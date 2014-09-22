@@ -1,0 +1,32 @@
+#  FwGuardian 5.0 (2014)
+#
+#  INPUT permissions
+#
+#  Sintaxe (fwroute.rules based):
+#    alias    <alias_name> <alias_value>
+#
+#    <if_in>  <src_ipaddr>                   <Target> <ports/proto>
+#    <if_in>  <src_ipaddr> <dst_fwipaddr>    <Target> <ports/proto>
+# 
+#  Perm:
+#    %A: ACCEPT, %D: DROP, %R: REJECT and <profiles>
+#
+#  To enable this module:
+#    ./fwguardian --enable infilters
+#
+
+set-policy Admin chk=disabled
+iflan                host_mg                             any                                 ACCEPT               port=tcp/22,5022
+iflan                local_net                           any                                 ACCEPT               port=tcp/22,5022 chk=disabled
+
+set-policy LAN
+iflan                0/0                                 any                                 ACCEPT               port=udp/67:68 chk=disabled desc="DHCP Server"
+iflan                local_net                           any                                 ACCEPT               port=udp/53 desc="DNS"
+iflan                local_net                           any                                 ACCEPT               port=tcp/53 chk=disabled desc="DNS"
+iflan                local_net                           any                                 DropStr              port=tcp/3128,8080 nonew desc="Proxy Limit"
+iflan                local_net                           any                                 synlimit             port=tcp new desc="Syn Limit"
+iflan                local_net                           any                                 ACCEPT               port=tcp/80,8080 desc="Manual proxy port and web"
+
+set-policy Manager chk=disabled
+iflan                server_mg                           any                                 ACCEPT               port=icmp desc="ICMP monitor"
+iflan                server_mg                           any                                 ACCEPT               port=udp/161:162 desc="SNMP monitor"

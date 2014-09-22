@@ -1,0 +1,13 @@
+#!/bin/bash
+
+MY_DIR=$(readlink -f "$(dirname $0)"/)
+CPP_COMP=$(which g++)
+
+if [ ! -x $CPP_COMP ]; then
+   echo
+   echo "ERROR: I cant find g++ compiler!"
+   echo
+   exit
+fi
+
+$CPP_COMP -o msnsniffer $MY_DIR/src/msnsniffer.cpp $MY_DIR/src/util.cpp $MY_DIR/src/msn_conntrack.cpp $MY_DIR/src/msn_handlers.cpp -lpcap $MY_DIR/src/pcap_stuff.cpp

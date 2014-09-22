@@ -1,0 +1,7 @@
+zone "local-zone" {
+      type forward;
+      forward only;
+      forwarders {
+           127.0.1.1;
+      };
+};

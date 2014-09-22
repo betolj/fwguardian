@@ -1,0 +1,97 @@
+msnsniffer, by Humberto L Jucá, betolj@gmail.com
+------------------------------------------------------------
+
+
+DESCRIPTION
+-----------
+msnsniffer is a simple program to log Instant Message activity 
+on the network - This is a IMSniff fork! 
+
+
+RUNNING (LINUX)
+---------------
+You can configure it via command line parameters or via a
+file called msnsniffer.conf either in the current directory
+or in /etc. If for some reason you rename the msnsniffer 
+execute, you need to rename the config file as well.
+A sample msnsniffer.conf.sample file is included.
+
+The only required parameter is the interface name to listen
+to. This can be any interface that libpcap supports, such
+as
+
+msnsniffer -i eth0
+
+If you use a non-ethernet interface, please read the data 
+offset section below.
+
+For users connecting after msnsniffer starts running you can get
+pretty good results, including complete contact lists and 
+events (display name change, for example). For users already
+connected you will be able to get the conversations, which is
+not bad, but you will miss other stuff.
+
+OTHER PARAMETERS
+----------------
+command line       config file       Description
+------------------------------------------------------------
+-cd                chatdir           Directory where conversations
+                                     will be stored.
+-dd                debugdir          Directory where logs will be
+                                     stored. These logs contain
+				     debug information as well 
+				     as certain MSN events. 
+-v*                verbose           Debug level. The more v's
+                                     (or higher the number in the
+				     config file), the more info
+				     that is dumped. For regular
+				     usage, use 1 or 2. More than
+				     that will dump a lot of useless
+				     stuff.
+
+-i                 interface         Device name (such as eth0) to listen to.
+-p                 promisc           Put the device in promiscuous
+                                     mode.
+
+-d                 daemonize         Become a daemon.
+-offset            data_offset       See below.
+-help              N/A               Display help.
+
+-filter            Traffic filter    Pcap filter (change the main pcap filter)
+-proxy             Traffic filter    Analyse only <proxy>:<port>
+
+
+DATA OFFSET
+-----------
+The offset (in this context) is the length of the datalink header
+when capturing packets. This is an important number because we 
+need to skip this header when processing packets. For ethernet,
+this number is 14, and msnsniffer knows about it. If you use a different
+interface, you might have to help msnsniffer by providing the number
+yourself. Por example:
+
+msnsniffer -i ppp0 -offset 4
+
+How do you figure out this number? The easiest way is just try 
+different numbers (and keep your own MSN connection busy (type something)
+until msnsniffer starts dumping conversations. The number is never high
+anyway. A few tries should always do.
+
+If you have to use this, once it's working please drop me a note telling
+me what interface type msnsniffer reported, and the offset you used. I will
+add this to the code so next versions don't have to be tuned manually.
+
+STATUS
+------
+Beta version. Seems to work decently.
+
+
+SUPPORTED PROTOCOLS
+-------------------
+For now, only MSN.
+
+
+REQUIREMENTS
+------------
+libpcab
+

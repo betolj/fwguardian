@@ -1,0 +1,5 @@
+group Internet
+  routing/fwroute.rules routes/internet
+
+group Lan
+  routing/fwroute.rules routes/networks

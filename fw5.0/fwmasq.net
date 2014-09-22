@@ -1,0 +1,24 @@
+#  FwGuardian 5.0 (2014)
+#
+#  MASQUERADE AND PROXY RULES
+#  - alias support
+#
+#  Sintaxe:
+#    "<ifin>"->"<ifout>" <local_net> <options>
+#
+#  Options:
+#    nomasq               dont do MASQUERADE
+#    autosnat             make a proper SNAT rule (without MASQ)
+#
+#    denyhttp             deny forward tcp/80
+#    proxyport=<port>     proxy port (INPUT)
+#    redirect             transparent proxy
+#
+#    p3scan=<port>        p3scan antivirus proxy port
+#
+#    defprof=<profile>    set a default profile (override default in fwguardian.conf)
+#    limitprof=<profile>  set a limit profile (PKTLIMIT or CONNLIMIT)
+#
+
+iflan->ifwan1        local_net                           proxyport=3128 redirect limitprof=NScan,CLimit
+iflan->ifwan1        local_net                           proxyport=8080 limitprof=NScan,CLimit

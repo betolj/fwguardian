@@ -1,0 +1,51 @@
+#
+# - Configure to 2 queues to the network interface
+#
+# 1. Configure "set-mirror" on target interface
+# 2. Define the mirrored interface with "mirrored" option
+#
+
+set-qos		tf_egress                      ifwan1:100Mbit	 set-default set-mirror
+set-qos		tf_ingress                     ifwan1:8Mbit	 set-default mirrored
+
+set-filter
+ifwan1          any                                 any                                 MIRROR         
+any             local_net                           any                                 LB              sport=tcp/80 chk=disabled desc="LB class example"
+eth0            any                                 10.1.1.100                          TC-IGNORE       sport=tcp/443 chk=disabled
+eth1            67.28.122.12                        any                                 IN-IGNORE       chk=disabled
+eth0            local_net                           any                                 IN-IGNORE       10kbit chk=disabled desc="Define best-effort when < 10Kbit"
+eth0            local_net                           any                                 INGRESS         256kbit burst=20k sport=tcp/20 desc="Policing active ftp-data"
+eth0            189.7.75.0/24                       any                                 INGRESS         256kbit burst=10k desc="Policing youtube addr - Inaccurate"
+
+set-egress      tf_egress->othertcp            25Mbit:98Mbit     burst=30k prio=3 sfq-flow=dst/1024 desc="Default TCP"
+any             any                                 any                                 SHAPE            dport=tcp
+
+set-egress      tf_egress->webserver           30Mbit:98Mbit     burst=50k prio=2 sfq-flow=dst/1024 desc="Web"
+any             any                                 any                                 FILTER
+any             any                                 any                                 SHAPE            sport=tcp/80,443,8080,8081 length=1:1000
+
+set-egress      tf_egress->default             20Mbit:90Mbit     burst=20k prio=4 sfq-flow=disabled desc="Default class"
+any             any                                 any                                 SHAPE            dport=udp
+
+set-egress      tf_egress->interactive         3Mbit:8Mbit       burst=20k prio=1 sfq-flow=disabled desc="Traf interactive"
+any             any                                 any                                 SHAPE            sport=tcp/21:23,5022,8022
+
+
+set-egress      tf_ingress->othertcpin         2Mbit:8Mbit       burst=30k prio=3 sfq-flow=dst/1024 desc="Default TCP - mirror (only tc)"
+any             any                                 any                                 SHAPE            dport=tcp desc="Mirror works only with tc"
+
+set-egress      tf_ingress->webserverin        2Mbit:8Mbit       burst=50k prio=2 sfq-flow=dst/1024 desc="Web - mirror (only tc)"
+any             any                                 any                                 SHAPE            sport=tcp/80 length=1:1000 desc="Mirror works only with tc"
+any             any                                 any                                 SHAPE            sport=tcp/443 length=1:1000
+any             any                                 any                                 SHAPE            sport=tcp/8080 length=1:1000
+any             any                                 any                                 SHAPE            sport=tcp/8081 length=1:1000
+
+set-egress      tf_ingress->defaultin          2Mbit:7Mbit       burst=20k prio=4 sfq-flow=disabled desc="Default class - mirror (only tc)"
+any             any                                 any                                 SHAPE            dport=udp desc="Mirror works only with tc"
+
+set-egress      tf_ingress->interactivein      2Mbit:6Mbit       burst=20k prio=1 sfq-flow=disabled desc="Traf interactive - mirror (only tc)"
+any             any                                 any                                 SHAPE            sport=tcp/21 desc="Mirror works only with tc"
+any             any                                 any                                 SHAPE            sport=tcp/22
+any             any                                 any                                 SHAPE            sport=tcp/23
+any             any                                 any                                 SHAPE            sport=tcp/5022
+any             any                                 any                                 SHAPE            sport=tcp/8022

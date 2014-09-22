@@ -1,0 +1,41 @@
+
+
+# Logging
+
+# Enable connection debugging facilities.
+# (see your syslog configuration for where pppd sends to)
+#debug
+
+# Print out all the option values which have been set.
+# (often requested by mailing list to verify options)
+#dump
+
+
+# Miscellaneous
+
+# Create a UUCP-style lock file for the pseudo-tty to ensure exclusive
+# access.
+lock
+
+# Disable BSD-Compress compression
+nobsdcomp 
+
+# Disable Van Jacobson compression 
+# (needed on some networks with Windows 9x/ME/XP clients, see posting to
+# poptop-server on 14th April 2005 by Pawel Pokrywka and followups,
+# http://marc.theaimsgroup.com/?t=111343175400006&r=1&w=2 )
+novj
+novjccomp
+
+# Deny IPX
+noipx
+
+# turn off logging to stderr, since this may be redirected to pptpd
+nologfd
+
+# timeouts
+idle 1800
+connect-delay 5000
+lcp-echo-interval 30
+lcp-echo-failure 4
+

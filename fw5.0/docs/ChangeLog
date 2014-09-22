@@ -1,0 +1,72 @@
+FwGuardian 5.0
+--------------
+
+The Web GUI for Firewall Configuration was introduced only in 4.2 series.
+The main bugfix was made in this series.
+
+
+14 June 2014
+	Starting the new firewall serie.
+
+10 Aug 2014
+	New version 5.0.1
+	- GUI condition policy bugfix with search calls
+	- Add authlog into "Captive portal" menu
+
+19 Aug 2014
+	New version 5.0.2 and bugfix and start FwGuardian TurnKey Linux Appliance project
+	- Move TRUST list, bannedaccess and routes to directory accesslist (for TKL Appliance project)
+	- Fix script paths with accesslist change
+	- start.sh pptp bugfix
+
+24 Aug 2014
+	New features
+	- Include a global IPS and P2P security detection into interfaces file control
+
+26 Aug 2014
+	New features
+	- Include interfaces.pl for network interface configuration
+	- Now, you can enable or disable interface IPS or DropP2P using "network interfaces"
+	- webauth.mod improvements
+	- Make *firstboot* script when starting by Turnkey Linux Appliance
+	- turnkey-dev.tar.gz package: steps to build Turnkey Appliance (Debian like)
+
+27 Aug 2014
+	Web interface changes
+	- return to search field after a search event if we use selectbox (feset.pl)
+	- improve auth logs
+	- include alias in "network options" (LAN or WAN)
+
+31 Aug 2014
+	Cluster changes
+	- Remove vmac_xmit_base option when vmac was enabled
+	- Make a arp cache flush when node become master or slave
+	- vmac_tweak.sh code review
+
+02 Sep 2014
+	Interfaces changes
+	- Display only interfaces with changes
+
+03 Sep 2014
+	NOTRACK with stateless bugfix
+	- rtfilter.inc fix
+
+05 Sep 2014
+	Interfaces changes
+	- Remove cluster rsync interfaces file
+
+06 Sep 2014
+	QoS addons
+	- Include "packets" option to define "limit" SFQ or pfifo
+	- Change qosegress.pl and json.pl with QoS "packets" option
+	- Add a pfifo qdisc (leaf) if you disable SFQ
+
+13 Sep 2014
+	SYNPROXY options
+	- Change fwguardian main script to load tcp options into TCPOPT and set SYNPROXY
+	- Update raw table when you configure a manual SYNPROXY rule in fwroute.rules
+
+21 Sep 2014
+	VPN and fwroute.tables fix
+	- Dont update RtSec policy when vpn user mapps was defined with "*"
+	- Force fwmark RPDB rules when enable ip route load balance

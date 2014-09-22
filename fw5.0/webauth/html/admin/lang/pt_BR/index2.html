@@ -1,0 +1,94 @@
+<html>
+<head>
+<title>FwGuardian 5.0 - Web Administrator</title>
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<link href="/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+
+<style>
+   td { border: none; }
+   .uibt
+   {
+      font-size: 12px;
+      padding: 1px;
+   }
+   .uibt:hover
+   {
+      font-size: 12px;
+      color: green;
+      padding: 0;
+   }
+   .uibt_em
+   {
+      font-size: 12px;
+      padding: 1px;
+   }
+   .uibt_em:hover
+   {
+      font-size: 12px;
+      color: red;
+      padding: 0;
+   }
+</style>
+
+<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.button.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $(".uibt" ).button();
+        $(".uibt_em" ).button();
+        $("#btsub").click(function() {
+                 document.fLogin.submit();
+                 return false;
+        });
+        $("#btcan").click(function() {
+                 window.location.href='/admin/logout.html';
+                 return false;
+        });
+        $("#btres").click(function() {
+                 document.fLogin.reset();
+                 return false;
+        });
+
+        $('#loginId').keydown(function (event) {
+             var keypressed = event.keyCode || event.which;
+             if (keypressed == 13) $(this).closest('form').submit();
+        });
+    });
+</script>
+
+</head>
+<body bgcolor="#F2F2F2" style="background-image: url(data:image/gif;base64,R0lGODlhCAAIAJEAAMzMzP///////wAAACH5BAEHAAIALAAAAAAIAAgAAAINhG4nudroGJBRsYcxKAA7);">
+  <form name="fLogin" action="/admlogin.cgi[URL]" method="post">
+    <table align="center" width="400" height="100%" border="0" cellpadding="0" cellspacing="0">
+       <tr><td>
+         <table width="100%" border="0" cellspacing="1" cellpadding="5" bgcolor="#CCCCCC">
+            <tr><td bgcolor="#56556a"><font color="#FFFFFF" size="2" face="Arial, Helvetica, sans-serif">
+            <strong>Login administrativo</strong></font></td></tr>
+            <tr>
+               <td bgcolor="#eeeeee"> 
+                 <table width="100%" border="0" cellspacing="0" cellpadding="2">
+                   <tr><td align="right"><strong>
+                   <font size="2" face="Arial, Helvetica, sans-serif">Usu&aacute;rio:</strong></font></td>
+                   <td><input name="username" type="text" size="16"></td></tr>
+
+                   <tr><td align="right">
+                   <font size="2" face="Arial, Helvetica, sans-serif"><strong>Senha:</strong></font></td>
+                   <td><input id="loginId" name="password" type="password" size="16"></td></tr>
+
+                   <tr><td align="right">&nbsp;</td>
+                   <td><BR /><a href="#" id="btsub" class="uibt">Login</a>
+                   <a href="#" id="btcan" class="uibt_em">Logout</a>
+                   &nbsp;&nbsp;<a href="#" id="btres" class="uibt_em">Limpar</a></td>
+                   </tr>
+                 </table>
+               </td>
+            </tr>
+         </table>
+       </td></tr>
+    </table>
+   </form>
+  </body>
+</html>

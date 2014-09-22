@@ -1,0 +1,35 @@
+tfshow 1.3
+----------
+
+09 Nov 2011
+	New tfshow version (1.3)
+	CPU otimizations
+	Change lock control
+	tcpkill bugfix (packet size in tcp cksum calcs)
+
+15 Sep 2011
+	New tfshow version (1.2)
+	Include a Join output format for fwguardian stats
+
+29 Mar 2011
+	New tfshow version (1.1)
+	Segmentation fault bugfix (include new lock control)
+
+
+04 Mar 2011
+	Add "tcp-syn" pcap filter option (-s)
+	- This option will show per source statistic.
+	- Useful to identify "syn flood" attack
+
+	If you'd like to view default flow, set pcap filter manually:
+	  (tcp[tcpflags] & (tcp-syn) != 0) and (tcp[tcpflags] & (tcp-ack) == 0)
+
+
+03 Mar 2011
+	Add pseudo "any" interface support
+	Change clear screen function
+
+
+Last
+	tfshow 1.0: The First public release 
+

@@ -1,0 +1,19 @@
+# security
+syn_cookie yes
+tcp_dos_protect yes
+drop_portscan yes
+rp_filter yes
+icmp_bogus_error no
+ignore_brd_icmp no
+send_redirects no
+secure_redirects yes
+deny_src_rt yes
+deny_icmp_redir yes
+defrag no
+unclean no
+
+# log
+log_martians no
+log_ping no
+log_indirect_drop yes
+log_indirect_broadcast no

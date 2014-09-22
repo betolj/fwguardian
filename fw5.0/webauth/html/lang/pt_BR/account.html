@@ -1,0 +1,193 @@
+<html>
+  <head>
+  <title>FwGuardian 5.0 - User account manager</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <link href="/css/csstab.css" type="text/css" rel="stylesheet" />
+  <link href="/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+
+  <style>
+    td { border: none; }
+    .uibt
+    {
+       font-size: 12px;
+       padding: 1px;
+    }
+    .uibt:hover
+    {
+       font-size: 12px;
+       color: green;
+       padding: 0;
+    }
+    .uibt_em
+    {
+       font-size: 12px;
+       padding: 1px;
+    }
+    .uibt_em:hover
+    {
+       font-size: 12px;
+       color: red;
+       padding: 0;
+    }
+  </style>
+
+  <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  <script type="text/javascript" src="/js/jquery.ui.core.js"></script>
+  <script type="text/javascript" src="/js/jquery.ui.widget.js"></script>
+  <script type="text/javascript" src="/js/jquery.ui.button.js"></script>
+
+  <script type="text/javascript">
+    function chkpass(ptype) {
+       var pass1;
+       var pass2;
+
+       if (ptype == "chpw") {
+          pass1 = document.faccount.ch_password;
+          pass2 = document.faccount.ch_cpassword;
+       }
+       else {
+          pass1 = document.faccount.password;
+          pass2 = document.faccount.cpassword;
+       }
+       if (pass1.value != pass2.value) {
+          alert('As senhas n&atilde;o conferem! ');
+          pass1.value = '';
+          pass2.value = '';
+          pass1.focus();
+       }
+    }
+
+    $(function() {
+        $(".uibt" ).button();
+        $(".uibt_em" ).button();
+        $("#btsub1").click(function() {
+                 document.faccount.submit();
+                 return false;
+        });
+        $("#btsub2").click(function() {
+                 document.faccount.bt_chpw.click();
+                 return false;
+        });
+        $("#btcan1").click(function() {
+                 window.location.href='/index2.html';
+                 return false;
+        });
+        $("#btcan2").click(function() {
+                 window.location.href='/index2.html';
+                 return false;
+        });
+    });
+  </script>
+  </head>
+
+<body bgcolor="#F2F2F2" style="background-image: url(data:image/gif;base64,R0lGODlhCAAIAJEAAMzMzP///////wAAACH5BAEHAAIALAAAAAAIAAgAAAINhG4nudroGJBRsYcxKAA7);" onload="document.getElementById('tab_account').style.display='block';">
+
+<DIV align="center"><BR />
+<form name="faccount" action="/chaccount.cgi" method="post">
+<span id="tab_account" style="display: none;">
+  <ul id="tabs">
+      <li><a href="#" name="#tab1"> Nova conta </a></li>
+      <li><a href="#" name="#tab2"> Troca de senha </a></li>
+  </ul>
+
+  <div id='content'>
+
+  <div id='tab1'>
+  <BR /><BR /><BR />
+  <table width="70%" border="0" cellspacing="1" cellpadding="5" bgcolor="#CCCCCC"><tbody>
+     <tr><td bgcolor="#56556a"><font color="#FFFFFF" size="2" face="Arial, Helvetica, sans-serif">
+        <strong>Inclus&atilde;o de nova conta de usu&aacute;rio</strong></font>
+     </td></tr>
+     <tr><td bgcolor="#eeeeee"><BR />
+	<table border="0" cellpadding="2" cellspacing="0" width="100%" height="60%"><tbody>
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" color="#800000" size="2">
+		  <strong>Usu&aacute;rio:</strong></font></td>
+              <td><input name="username" size="16" type="text"></td></tr>
+	  <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" color="#800000" size="2">
+		  <strong>Senha:</strong></font></td>
+              <td><input name="password" size="16" type="password"></td></tr>
+	  <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" color="#800000" size="2">
+		  <strong>Confirme a senha:</strong></font></td>
+          <td><input name="cpassword" size="16" type="password" onblur="return chkpass('');"></td></tr>
+
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" size="1"><BR />
+		  <strong>Nome completo:</font></strong></td>
+              <td><font face="Arial, Helvetica, sans-serif" size="1"><BR />
+                  <input size="45" name="FullName"></font></td></tr>
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" size="1">
+                 &nbsp; <strong>ID nacional(RG):</strong></font></td>
+              <td style=""><font face="Arial, Helvetica, sans-serif" size="1">
+		      <input size="25" name="NID_RG"></font></td></tr>
+	  <tr><td style="text-align: right;"><strong><font face="Arial, Helvetica, sans-serif" size="1">
+                   <strong>Endere&ccedil;o:</strong></font></td>
+              <td><font face="Arial, Helvetica, sans-serif" size="1">
+		      <input size="52" name="haddr"></font></td></tr>
+	  <tr><td style="text-align: right;"><strong><font face="Arial, Helvetica, sans-serif" size="1">
+                   <strong>Email:</strong></font></td>
+              <td><font face="Arial, Helvetica, sans-serif" size="1">
+		      <input size="30" name="EMail"></font></td></tr>
+          <tr><td style="text-align: right;"><strong><font face="Arial, Helvetica, sans-serif" size="1"><BR />
+                   <strong>Telefone (fixo):<strong></font></td>
+  	      <td><font face="Arial, Helvetica, sans-serif" size="1"><BR />
+                   <input size="20" name="Phone"></font></td></tr>
+          <tr><td style="text-align: right;"><strong><font face="Arial, Helvetica, sans-serif" size="1">
+                   <strong>Telefone (celular):<strong></font></td>
+              <td><font face="Arial, Helvetica, sans-serif" size="1">
+                   <input size="20" name="Phone2"></font></td></tr>
+          <tr><td><BR /></td></tr>
+        </tbody></table>
+     </td></tr>
+  </tbody></table>
+  <BR />
+    <DIV align="center">
+      <a href="#" id="btsub1" class="uibt">Salvar</a>
+      <a href="#" id="btcan1" class="uibt_em">Cancelar</a><BR />
+    </DIV>
+  </DIV> <!-- Close TAB1 -->
+
+  <div id='tab2'>
+  <BR /><BR /><BR />
+  <table width="60%" border="0" cellspacing="1" cellpadding="5" bgcolor="#CCCCCC"><tbody>
+     <tr><td bgcolor="#56556a"><font color="#FFFFFF" size="2" face="Arial, Helvetica, sans-serif">
+        <strong>Troca de senha</strong></font>
+     </td></tr>
+     <tr><td bgcolor="#eeeeee"><BR />
+	<table border="0" cellpadding="2" cellspacing="0" width="100%" height="60%"><tbody>
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" color="#800000" size="2">
+		  <strong>Usu&aacute;rio:</strong></font></td>
+              <td><input name="ch_username" size="16" type="text"></td></tr>
+	  <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" color="#800000" size="2">
+		  <strong>Senha:</strong></font></td>
+              <td><input name="ch_password" size="16" type="password"></td></tr>
+	  <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" color="#800000" size="2">
+		  <strong>Confirme a senha:</strong></font></td>
+          <td><input name="ch_cpassword" size="16" type="password" onblur="return chkpass('chpw');"></td></tr>
+
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" size="1"><BR />
+                 &nbsp; <strong>ID Nacional(RG):</strong></font></td>
+              <td style=""><font face="Arial, Helvetica, sans-serif" size="1"><BR />
+		      <input size="25" name="ch_NID_RG"></font></td></tr>
+	  <tr><td style="text-align: right;"><strong><font face="Arial, Helvetica, sans-serif" size="1">
+                   <strong>Email:</strong></font></td>
+              <td><font face="Arial, Helvetica, sans-serif" size="1">
+		      <input size="30" name="ch_EMail"></font></td></tr>
+          <tr><td><BR /></td></tr>
+        </tbody></table>
+     </td></tr>
+  </tbody></table>
+  <BR />
+    <DIV align="center">
+      <input value="Trocar" name="bt_chpw" type="submit" style="visibility:hidden; position:absolute;">
+      <a href="#" id="btsub2" class="uibt">Alterar</a>
+      <a href="#" id="btcan2" class="uibt_em">Cancelar</a><BR />
+    </DIV>
+  </DIV> <!-- Close TAB2 -->
+
+  </div> <!-- Close Div content -->
+
+</span></form></DIV>
+
+<script type="text/javascript" src="/js/csstab.js"></script>
+</body>
+</html>
+

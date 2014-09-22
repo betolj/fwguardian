@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+# FwGuardian startup script.
+#
+# chkconfig: 2345 50 90
+#
+# description: Automates a packet filtering firewall with iptables.
+# config: /etc/sysconfig/fwguardian
+#
+### BEGIN INIT INFO
+# Provides:          fwguardian firewall
+# Required-Start:    $network $remote_fs inithooks
+# Required-Stop:     $network $remote_fs inithooks
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 6
+# Short-Description: iptables packet filtering
+# Description:       Automates a packet filtering firewall with iptables,
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin
+
+. /lib/lsb/init-functions
+if [ -d /etc/default ]; then
+   [ -f /etc/default/inithooks ] && . /etc/default/inithooks
+   [ -f /etc/default/fwguardian ] && . /etc/default/fwguardian
+else
+   . /etc/sysconfig/fwguardian
+fi 
+
+iftable() {
+  if fgrep -qsx $1 /proc/net/ip_tables_names; then
+     iptables -t "$@"
+  fi
+}
+
+stop() {
+  chains=`cat /proc/net/ip_tables_names 2>/dev/null`
+  for i in $chains; do iptables -t $i -F; done
+  for i in $chains; do iptables -t $i -X; done
+  iftable filter -P INPUT ACCEPT && \
+     iftable filter -P OUTPUT ACCEPT && \
+     iftable filter -P FORWARD ACCEPT && \
+     iftable nat -P PREROUTING ACCEPT && \
+     iftable nat -P POSTROUTING ACCEPT && \
+     iftable nat -P OUTPUT ACCEPT && \
+     iftable mangle -P PREROUTING ACCEPT && \
+     iftable mangle -P OUTPUT ACCEPT
+  echo
+  rm -f /var/lock/fwguardian
+  rm -f /tmp/clusterbase.lock 2>/dev/null
+  rm -f /tmp/glusterfs.lock 2>/dev/null
+  exit
+}
+
+test -f "$FW_DIR/fwguardian" || {
+  echo -e "\t Unable to find fwguardian script!"
+  exit
+}
+
+
+case "$1" in
+  start)
+        log_begin_msg "Loading FwGuardian" "fwguardian"
+
+	[ -d /etc/sysconfig ] && gprintf "Loading FwGuardian"
+	[ ! -d /var/log/fwguardian ] && mkdir /var/log/fwguardian
+
+	echo -e "\n(re)Starting FwGuardian at: `date`" 2>&1 >> /var/log/fwguardian/starting
+	$FW_DIR/fwguardian 2>&1 >>/var/log/fwguardian/starting
+	touch /var/lock/fwguardian
+
+        log_action_end_msg $?
+    ;;
+
+  stop)
+        log_begin_msg "Resetting built-in chains to the default ACCEPT policy" "fwguardian"
+	stop
+        log_action_end_msg $?
+	exit 0
+    ;;
+
+  restart|reload|force-reload)
+	echo "Error: argument '$1' not supported" >&2
+	exit 3
+    ;;
+
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
+

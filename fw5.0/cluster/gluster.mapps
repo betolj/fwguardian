@@ -1,0 +1,7 @@
+group net_manager
+  allow-policy firewall
+  allow-policy proxy
+
+group net_others
+  allow-policy firewall
+  allow-policy proxy

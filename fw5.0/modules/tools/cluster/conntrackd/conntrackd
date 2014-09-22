@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# (C) 2014 by Humberto L Jucá <betolj@gmail.com>
+#
+# This software may be used and distributed according to the terms
+# of the GNU General Public License, incorporated herein by reference.
+#
+# Simple conntrackd service control
+#
+
+[ "$1" != "run" ] && exit
+
+cmd=$2;
+conntrackd=$(which conntrackd 2>/dev/null)
+
+stop() {
+  $conntrackd -k -C /etc/conntrackd/conntrackd.conf
+
+#  for pid in $(pidof conntrackd); do
+#    kill -9 $pid
+#  done
+  if [ -f /var/run/conntrackd.pid ]; then
+     kill $(cat /var/run/conntrackd.pid 2>/dev/null) 2>/dev/null
+     rm -f /var/run/conntrackd.pid 2>/dev/null
+  fi
+
+  rm -f /var/lock/conntrackd.lock
+  [ "$cmd" == "stop" ] && exit
+}
+
+test -f "$conntrackd" || {
+  echo -e "\t Unable to find conntrackd daemon!"
+  exit
+}
+
+[ "$cmd" == "stop" ] || [ "$cmd" == "restart" ] && stop
+
+### Start conntrackd if is not running
+if [ ! "$(pidof conntrackd)" ] || [ "$cmd" == "restart" ]; then
+   $conntrackd -d -C /etc/conntrackd/conntrackd.conf
+   touch /var/lock/conntrackd.lock
+fi
+

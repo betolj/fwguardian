@@ -1,0 +1,7 @@
+daemonize = 0
+promisc = 0
+verbose = 2
+chatdir = /tmp/chats
+debugdir = /tmp/debug
+interface eth0
+

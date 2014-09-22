@@ -1,0 +1,19 @@
+#  FwGuardian 5.0 (2014)
+#
+#   set-condition
+#
+#   With set-condition you can create conditions for the *script*. So far the
+#   only test available is the "exist" to validate the presence of a file.
+#
+#   The *condition tests* applies only to the *processing of the script* and can 
+#   be used in "fwinput", "fwroute" and "tfshape.conf". Do not set it directly on
+#   this files. For this configuration choose the file "conditions".
+#
+#   Each rule, policy or QoS class can be tested with option "chk=".
+#
+#   - It is a useful resource in a cluster environment.
+#
+#     set-condition <name> exist <absolute_path/file_name>
+#
+set-condition iscore exist /var/tmp/cluster.vip.10
+set-condition isproxy exist /var/tmp/cluster.vip.20

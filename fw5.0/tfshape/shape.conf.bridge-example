@@ -1,0 +1,28 @@
+#
+# Set phy0 (alias) interface in set-qos
+#
+
+set-qos         tf_egress                      phy0:100Mbit      set-default
+
+set-filter
+any             local_net                           any                                 LB              sport=tcp/80 chk=disabled desc="LB class example"
+
+set-egress      tf_egress->othertcp            25Mbit:98Mbit     burst=30k prio=3 sfq-flow=dst/1024 desc="Default TCP"
+br0             any                                 any                                 SHAPE            dport=tcp
+
+set-egress      tf_egress->webserver           30Mbit:98Mbit     burst=50k prio=2 sfq-flow=dst/1024 desc="Web"
+br0             any                                 any                                 FILTER
+br0             200.200.200.1                       any                                 SHAPE            sport=tcp/80,443,8080,8081 desc="Server 1"
+br0             200.200.200.2                       any                                 SHAPE            sport=tcp/80,443,8080,8081 desc="Server 2"
+br0             any                                 any                                 SHAPE            sport=tcp/80,443,8080,8081 length=1:1000
+
+set-egress      tf_egress->default             20Mbit:90Mbit     burst=20k prio=4 sfq-flow=disabled desc="Default class"
+br0             any                                 any                                 SHAPE            dport=udp
+
+set-egress      tf_egress->interactive         3Mbit:10Mbit      burst=20k prio=1 sfq-flow=disabled desc="Traf interactive"
+br0             any                                 any                                 SHAPE            sport=tcp/21:23,5022,8022
+
+set-egress      tf_egress->Internacional       20Mbit:80Mbit     burst=20k prio=5 sfq-flow=dst/1024 desc="International classify"
+br0             any                                 any                                 IGNORE           geoip=BR desc="Bypass Brasil IP address"
+br0             any                                 any                                 SHAPE            desc="Classify the others"
+

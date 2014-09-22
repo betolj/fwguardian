@@ -1,0 +1,15 @@
+#  FwGuardian 5.0 (2014)
+#
+#  Interface settings
+#  - Set *auto* value to preserve the default value
+#  - You can configure VLANs if exist vconfig tool
+#  - You can configure IRQ Affinity (CPUs)
+#  - Enable or disable rp_filter|arp_filter per interface
+#  - Set a bridge interface: auto (ignore), none (ignore), br0, br(n) or use_vlanid (bridge interface per VID)
+#
+#   Interface   mac         mtu    vlan      bridge    rp_filter arp_filter qlen   CPUs   IPS DropP2P  Description
+#   eth0        auto        auto   1         auto      0         0          5000   6,7    1   1        Local network
+#
+
+eth0          auto        1500   1           auto      2         0          2000   auto   1   1        Local network
+eth1          auto        1500   1           auto      2         0          2000   auto   1   1        Wan network

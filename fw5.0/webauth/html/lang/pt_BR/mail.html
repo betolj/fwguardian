@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>FwGuardian 5.0 - Entre em contato</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<link href="/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+
+<style>
+   td { border: none; }
+   .uibt
+   {
+      font-size: 12px;
+      padding: 1px;
+   }
+   .uibt:hover
+   {
+      font-size: 12px;
+      color: green;
+      padding: 0;
+   }
+   .uibt_em
+   {
+      font-size: 12px;
+      padding: 1px;
+   }
+   .uibt_em:hover
+   {
+      font-size: 12px;
+      color: red;
+      padding: 0;
+   }
+</style>
+
+<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.button.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $(".uibt" ).button();
+        $(".uibt_em" ).button();
+        $("#btsub").click(function() {
+                 document.faccount.submit();
+                 return false;
+        });
+        $("#btcan").click(function() {
+                 window.location.href='/index2.html';
+                 return false;
+        });
+    });
+</script>
+
+</head>
+<body bgcolor="#F2F2F2" style="background-image: url(data:image/gif;base64,R0lGODlhCAAIAJEAAMzMzP///////wAAACH5BAEHAAIALAAAAAAIAAgAAAINhG4nudroGJBRsYcxKAA7);">
+
+<form name="faccount" method="post" action="/sendmail.cgi">
+<table style="height:100%; width:100%;" align="center" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr valign="center"><td>
+  <DIV align="center">
+  <table width="70%" border="0" cellspacing="1" cellpadding="5" bgcolor="#CCCCCC"><tbody>
+     <tr><td bgcolor="#56556a"><font color="#FFFFFF" size="2" face="Arial, Helvetica, sans-serif">
+        <strong>Entre em contato</strong></font>
+     </td></tr>
+     <tr><td bgcolor="#eeeeee"><BR />
+       <table border="0" cellpadding="2" cellspacing="0" width="100%" height="60%"><tbody>
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" size="2">
+                <strong> Nome:</strong></font></td>
+              <td><input size="45" name="name" class="small" id="id_fname"></td></tr>
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" size="2">
+                <strong> Email:</strong></font><BR /></td>
+              <td><input name="mail" size="26" id="id_mail"></td></tr>
+          <tr><td style="text-align: right;"><font face="Arial, Helvetica, sans-serif" size="2"><BR />
+		<strong> Mensagem:</strong></font></td>
+             <td><BR /><textarea style="height: 180px; width: 88%; font-size: small;" name="mailmsg"></textarea>
+             <BR /><BR /></td>
+          </tr>
+       </tbody></table>
+       <BR />
+     </td></tr>
+  </tbody></table><BR />
+  <a href="#" id="btsub" class="uibt">Enviar</a>
+  <a href="#" id="btcan" class="uibt_em">Cancelar</a><BR />
+</td></tr>
+</tbody></table>
+</form>
+
+</body>
+</html>
+

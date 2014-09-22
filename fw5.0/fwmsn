@@ -1,0 +1,29 @@
+#  FwGuardian 5.0 (2014)
+#
+#  *This module will be REMOVED soon because it does not work for skype*
+#
+#  Simple MSN control
+#  - Allow user account
+#  - You cant use alias maps 
+#  
+#  Optional match sintaxe:
+#    check.address <postrouting_destination_addr>
+#    check.proxy <address[:port]>
+#    check.proxy 10.0.0.254:3128
+#
+#  Users sintaxe:
+#    allow.login <ip_addr> <user@account> [force]
+#    allow.login 10.0.0.1 usu1@hotmail.com
+#    allow.login 10.0.0.2 usu2@hotmail.com
+#
+#  To enable this module:
+#    ./fwguardian --enable msnctl
+#
+#  Will be deprecated soon - skype works in https
+#
+
+check.address 65.52.0.0/14
+check.address 207.46.0.0/16
+
+allow.login 10.0.0.1           user1@hotmail.com                                  desc="test 123"
+allow.login 10.0.0.2           user2@hotmail.com                                 

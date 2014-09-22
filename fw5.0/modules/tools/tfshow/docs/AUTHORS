@@ -1,0 +1,13 @@
+AUTHOR
+------
+Humberto L Jucá, betolj@gmail.com
+
+
+CREDITS
+-------
+The PCAP project, obviously the heart inside my small program.
+
+TCP Kill credits:
+/* http://www.programming-pcap.aldabaknocking.com/codesamples.html */
+/* TCP RST by R.Stevens: pseudoheader and send_tcprst */
+

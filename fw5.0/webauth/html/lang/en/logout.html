@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>FWGuardian 5.0 - Authenticated Area Access</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<link href="/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+
+<style>
+   td { border: none; }
+   .uibt
+   {
+      font-size: 12px;
+      padding: 1px;
+   }
+   .uibt:hover
+   {
+      font-size: 12px;
+      color: green;
+      padding: 0;
+   }
+   .uibt_em
+   {
+      font-size: 12px;
+      padding: 1px;
+   }
+   .uibt_em:hover
+   {
+      font-size: 12px;
+      color: red;
+      padding: 0;
+   }
+</style>
+
+<script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/js/jquery.ui.button.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $(".uibt" ).button();
+        $(".uibt_em" ).button();
+        $("#btsub").click(function() {
+                 document.fLogin.submit();
+                 return false;
+        });
+        $("#btcan").click(function() {
+                 window.location.href='/index2.html';
+                 return false;
+        });
+    });
+</script>
+
+</head>
+<body bgcolor="#F2F2F2" style="background-image: url(data:image/gif;base64,R0lGODlhCAAIAJEAAMzMzP///////wAAACH5BAEHAAIALAAAAAAIAAgAAAINhG4nudroGJBRsYcxKAA7);">
+
+<form name="fLogin" action="logout.cgi" method="post">
+   <table style="height:90%; width:100%;" align="center" border="0" cellspacing="0" cellpadding="0"><tbody>
+   <tr valign="center"><td>
+     <table width="40%" align="center" border="0" cellspacing="1" cellpadding="5" bgcolor="#CCCCCC"><tbody>
+        <tr><td bgcolor="#56556a"><font color="#FFFFFF" size="2" face="Arial, Helvetica, sans-serif">
+           <strong>Logout!</strong></font></td></tr>
+           <tr>
+              <td bgcolor="#eeeeee">
+                 <table width="100%" align="center" border="0" cellspacing="0" cellpadding="2"><tbody>
+                    <tr><td align="center" valign="center">
+                        <BR />Please click the button below.<BR /><BR />
+                        <a href="#" id="btsub" class="uibt">Logout</a>
+                        <a href="#" id="btcan" class="uibt_em">Cancel</a>
+                    </td></tr>
+                 </tbody></table>
+              </td>
+           </tr>
+        </td></tr>
+     </tbody></table>
+   </td></tr></tbody></table>
+</form>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" valign="center" align="center"><tbody>
+  <tr><center>
+      <td align=right><b>Your address: &nbsp;</b></td>
+      <td>PEER</td>
+      <td align=right><b>Access is currently: &nbsp;</b></td>
+      <td><strong>ACCESS</strong></td>
+  </center></tr>
+</tbody></table>
+
+</body>
+</html>

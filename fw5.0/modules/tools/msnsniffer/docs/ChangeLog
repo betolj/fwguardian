@@ -1,0 +1,25 @@
+msnsniffer 1.2.1
+----
+
+06 May 2011
+	The code for analysis under proxy has been rewritten.
+	The main bugfix to create the first stable version
+
+05 May 2011
+	JOI bugfix
+
+19 Apr 2011
+	New msnsniffer version (1.1)
+	Add SSO validation
+	Debug changes:
+	- Remove "-dd" option - now, the debugdir is based on chatdir!
+	- stdout is default output when start sniffer in foreground mode!
+
+
+This is imsniff based, so:
+	- Remove port to Windows
+	- Added interface option (mandatory)
+	- Change log chatdir (include date information)
+	- Change treatment for connection timeouts (resolv some segmentation faults and daemon abort)
+	- New support for connections protected by proxies (-proxy)
+	- New support for pcap filter (-filter)

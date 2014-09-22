@@ -1,0 +1,56 @@
+
+# exchange_mode main,base,aggressive if not anonymous
+remote anonymous {
+        exchange_mode main;
+        passive on;
+
+        doi ipsec_doi;
+        initial_contact on;
+        proposal_check obey;
+
+        ## Allow incoming roadwarrior
+        generate_policy on;
+        dpd_delay 30;
+        nat_traversal on;
+        support_proxy on;
+        ike_frag on;
+        script "removesa.sh" phase1_up;
+
+        verify_cert on;  # check certificate against revocation list
+        certificate_type x509 "fwcert.pem" "fwkey.pem";
+
+        ## Local and Peer ID
+        ## Extract id from public key
+        my_identifier asn1dn;
+        peers_identifier asn1dn;
+
+        ## Proposals
+        proposal
+        {
+                encryption_algorithm  aes;
+                hash_algorithm        sha1;
+                authentication_method rsasig;
+                dh_group              modp1024;
+                #dh_group modp2048;
+                #lifetime time 24 hour;
+        }
+        proposal
+        {
+                encryption_algorithm  3des;
+                hash_algorithm        sha1;
+                authentication_method rsasig;
+                dh_group              modp1024;
+                #dh_group modp2048;
+                #lifetime time 24 hour;
+        }
+}
+
+sainfo anonymous
+{
+        #lifetime time 1 hour ;
+        encryption_algorithm     aes,3des,blowfish 448,rijndael;
+        authentication_algorithm hmac_sha1;
+        compression_algorithm    deflate;
+        pfs_group                modp1024;
+}
+

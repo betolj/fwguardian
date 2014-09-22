@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# Run this script foreach fwguardian call (start moment)
+# - Maybe useful after --reload options
+#
+# To allow this function:
+#   chmod +x postload
+#

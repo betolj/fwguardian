@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+#  FwGuardian 5.0 (2014)
+#
+#  MANUAL IPTABLES RULES
+#
+#  Be carreful... this rules precede the automatic script rules.
+#  Its used to create rules with greater priority.
+#
+#  This file is *not* read for every "reload" call.
+#  "Manual rules loaded at the start of script processing"
+#
+
+[ "$1" != "start" ] && exit
+
+iptables=$(which iptables)
+localnet=10.0.0.0/24
+ifnet=eth1
+
+
+### Examples
+
+#ip link set $ifnet mtu 1492
+
+### Deny some traffic using netfilter "string" extension  
+#$iptables -t mangle -I PREROUTING -i $ifnet -m string --string "toolbar.msn" -j DROP
+#$iptables -t mangle -I PREROUTING -i $ifnet -s $localnet -m string --string "toolbar.desktoptraffic" -j DROP
+
+### Layer7 blocks (for kernels with layer7 extension) - anti p2p programs
+#$iptables -t mangle -I POSTROUTING -o eth0 -m ipp2p --ipp2p -j DROP
+#$iptables -t mangle -I POSTROUTING -o eth0 -m layer7 --l7proto live365 -j DROP
+#$iptables -t mangle -I POSTROUTING -o eth0 -m layer7 --l7proto skype -j DROP
+#$iptables -t mangle -I POSTROUTING -o eth0 -m layer7 --l7proto shoutcast -j DROP
+#$iptables -t mangle -I OUTPUT -m layer7 --l7proto shoutcast -j DROP 
+

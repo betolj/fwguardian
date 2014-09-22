@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+#  FwGuardian 5.0 (2014)
+#  MANUAL IPTABLES RULES
+#
+#  "Manual rules loaded at the end of script processing"
+#
+
+[ "$1" != "start" ] && exit
+
+iptables=$(which iptables)
+localnet=10.0.0.0/24
+ifnet=eth1

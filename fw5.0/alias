@@ -1,0 +1,9 @@
+; Dont change manually... this is managed only by webserver
+alias iflan eth0   webalias
+alias ifwan1 eth1   webalias
+alias ifwan2 eth2   webalias
+alias local_net 10.1.1.0/24   webalias
+alias host_mg 10.0.0.10   webalias
+alias server_mg 10.0.0.200   webalias
+alias phy0 phy:eth0   webalias
+alias range1 iprange:10.0.0.1-10.0.0.20   webalias

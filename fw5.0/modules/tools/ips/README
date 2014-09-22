@@ -1,0 +1,26 @@
+
+Suricata IPS and config files - Ubuntu / Debian config
+
+
+- Configure /etc/default/suricata
+  # set to yes to start the server in the init.d script
+  RUN=yes
+
+  # Please note that IPS mode is only available when using nfqueue
+  LISTENMODE=nfqueue
+
+  # Queue number to listen on (for nfqueue mode)
+  # - Include others -q 1 and -q 2 to do queue load balance
+  NFQUEUE="0 -q 1 -q 2"
+
+
+- Use fwroute.rules to define inline IPS mode flow:
+<if_in>    <ip_src>    <ip_dst>      <IPS-1|IPS-2|IPS-3>   <options>
+
+
+- The IPS-1, IPS-2 or IPS-3 are NFQUEUE targets:
+IPS-1 = NFQUEUE 0
+IPS-2 = NFQUEUE 0,1
+IPS-3 = NFQUEUE 0,1,2
+
+This IPS numbers are queue ids.

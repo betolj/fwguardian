@@ -1,0 +1,141 @@
+#!/bin/bash
+#
+# (C) 2014 by Humberto L Jucá <betolj@gmail.com>
+#
+# This software may be used and distributed according to the terms
+# of the GNU General Public License, incorporated herein by reference.
+#
+# Simple webserver daemon control
+#
+
+
+[ "$1" == "" ] && exit
+
+FW_DIR=$1
+sh=$(which bash)
+rrdtool=$(which rrdtool)
+iptables=$(which iptables)
+
+if [ -f /usr/share/fwguardian/webauth/control/ignore ] || [ ! -f /usr/share/fwguardian/webserver.ctl ]; then
+  rm -f /usr/share/fwguardian/webauth/control/ignore 2>/dev/null
+  exit
+fi
+
+killweb() {
+  ### Kill current webauth pid
+  kill $(cat /usr/share/fwguardian/webauth/control/webauth.pid 2>/dev/null) 2>/dev/null
+  rm -f /usr/share/fwguardian/webauth/control/webauth.pid 2>/dev/null
+}
+
+echo "Firewall... Loading the Fwguardian Webserver"
+
+### Testing perl webserver and crypt-MD5 modules
+modperl[0]="HTTP::Response;"
+modperl[1]="HTTP::Daemon::SSL;"
+#modperl[2]="Crypt::PasswdMD5;";
+modperl[2]="CGI::Session;"
+modperl[3]="CGI::Carp;"
+modperl[4]="DBI;"
+modperl[5]="DBD::mysql;"
+
+finderr=0
+for ckmod in $(echo ${modperl[*]}); do
+   if [ $(echo "use $ckmod" | perl 2>&1 | wc -l) -ne 0 ]; then
+      errtype="ERROR"
+      [ "$ckmod" == "Crypt::PasswdMD5;" ] || [ "$ckmod" == "DBI;" ] || [ "$ckmod" == "DBD::mysql;" ] && errtype="*WARN*" || finderr=1
+      echo -e '\t   \E[47;31m'"\033[1m Webserver $errtype: I cant find $ckmod\033[0m"
+   fi
+done
+
+if [ "$finderr" == "1" ]; then
+   echo -e '\t    Need perl-CGI!'
+   echo -e '\t    Need perl-CGI-Session (deb: libcgi-session-perl)!'
+   echo -e '\t    Need perl-HTTP-Daemon-SSL (deb: libhttp-daemon-ssl-perl)!'
+   echo -e '\t    *Optional perl-NetAddr-IP (deb: libnetaddr-ip-perl)!'
+   echo -e '\t    *Optional perl-Net-SMTP-Server (deb: libnet-smtp-server-perl)!'
+   echo -e '\t    *Optional perl-DBI and perl-DBD-mysql (deb: libdbi-perl and libdbd-mysql-perl)!'
+   exit
+fi
+
+
+### Make a proper enviroment
+[ ! -d /usr/share/fwguardian/webauth/control/ssl ] && mkdir -p /usr/share/fwguardian/webauth/control/ssl
+[ ! -d /usr/share/fwguardian/webauth/control/redir ] && mkdir -p /usr/share/fwguardian/webauth/control/redir
+if [ -f "$rrdtool" ] && [ ! -d /usr/share/fwguardian/webauth/rrd ]; then
+   mkdir -p /usr/share/fwguardian/webauth/rrd/{spool,img}
+   cp -f $FW_DIR/../modules/tools/rrd/rrd_collect.pl /usr/share/fwguardian/webauth/rrd/
+   cp -f $FW_DIR/../modules/tools/rrd/rrd-fwg /etc/cron.d/
+   ln -sf /usr/share/fwguardian/webauth/rrd/img $FW_DIR/html/admin/dynhttp/
+
+   perl /usr/share/fwguardian/webauth/rrd/rrd_collect.pl --system > /dev/null 2>/dev/null
+   perl /usr/share/fwguardian/webauth/rrd/rrd_collect.pl --interfaces >/dev/null 2>/dev/null
+fi
+
+### Copy config files
+md5pass=$($FW_DIR/../modules/chkmd5.mod $FW_DIR/webauth.conf)
+[ ! -f /usr/share/fwguardian/webauth/webauth.conf ] || [ "$md5pass" -eq 0 ] && \
+  cp -f $FW_DIR/webauth.conf /usr/share/fwguardian/webauth/ 
+
+md5pass=$($FW_DIR/../modules/chkmd5.mod $FW_DIR/webctl.sh)
+[ ! -f /usr/share/fwguardian/webauth/webctl.sh ] || [ "$md5pass" -eq 0 ] && \
+  cp -f $FW_DIR/webctl.sh /usr/share/fwguardian/webauth/
+
+md5pass=$($FW_DIR/../modules/chkmd5.mod $FW_DIR/bandwidth.sh)
+[ ! -f /usr/share/fwguardian/webauth/bandwidth.sh ] || [ "$md5pass" -eq 0 ] && \
+  cp -f $FW_DIR/bandwidth.sh /usr/share/fwguardian/webauth/
+
+### Remove lock
+rm -f /usr/share/fwguardian/webauth/control/CUR_USERS.lock 2>/dev/null
+
+### Verify https cert
+if [ ! -f /usr/share/fwguardian/webauth/control/ssl/webauth.cert ] || \
+[ ! -f /usr/share/fwguardian/webauth/control/ssl/webauth.key ]; then
+  echo -e '\E[47;31m'"\033[1m - Webauth WARNING... I cant found webserver keys (SSL)! \033[0m"  
+  echo -e '\E[47;31m'"\033[1m - Trying to Make the server keys with: fwguardian --make-https-cert \033[0m"
+  $FW_DIR/../fwguardian --make-https-cert
+fi
+
+### Webserver directory
+WEB_DIR=$FW_DIR
+[ $(echo "$FW_DIR" | grep "^/") ] || WEB_DIR="$(pwd $FW_DIR)/$FW_DIR"
+
+### Security changes
+id fwguardian 2>/dev/null >/dev/null || {
+  useradd fwguardian -g nogroup -s /bin/false
+  grep '^fwguardian' /etc/sudoers || echo "fwguardian ALL=(root) NOPASSWD: /usr/share/fwguardian/webauth/bandwidth.sh" >> /etc/sudoers
+}
+
+chown root.root $FW_DIR/includes/*.pl
+chmod -R 500 $FW_DIR/includes
+if [ -f "/usr/share/fwguardian/webauth/control/reset" ]; then
+   cat "/usr/share/fwguardian/webauth/control/CUR_USERS" 2>/dev/null | \
+   while read addr;
+   do
+      /usr/share/fwguardian/webauth/webctl.sh leave "$addr" __rollcall__
+   done
+   rm -f /tmp/sessions/cgisess_* 2>/dev/null
+   rm -f /usr/share/fwguardian/webauth/control/reset 2>/dev/null
+fi
+
+if [ -f "/var/tmp/interfaces" ]; then
+   diff $FW_DIR/../interfaces /var/tmp/interfaces >/dev/null 2>/dev/null || cp -f $FW_DIR/../interfaces /var/tmp/ 2>/dev/null
+else
+   cp -f $FW_DIR/../interfaces /var/tmp/ 2>/dev/null
+fi
+
+### Reset all shellinabox sessions
+$FW_DIR/shell.sh $FW_DIR reset
+$iptables -nL INPUT --line-numbers | awk '/ bwshell_ctl / { print "iptables -D INPUT "$1; }' | sort -k4 -n -r | $sh -
+[ -f /usr/share/fwguardian/webauth/control/bwcount ] && rm -f /usr/share/fwguardian/webauth/control/bwcount 2>/dev/null
+
+### Reload webserver
+killweb
+perl $FW_DIR/webauth.mod $WEB_DIR
+
+### web health
+if [ -f /usr/share/fwguardian/webauth/control/chkweb.pid ]; then
+  kill -9 $(cat /usr/share/fwguardian/webauth/control/chkweb.pid) 2>/dev/null
+fi
+if [ -f /usr/share/fwguardian/webhealth.ctl ]; then
+  perl $FW_DIR/chkweb.pl $FW_DIR &
+fi

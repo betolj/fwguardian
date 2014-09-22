@@ -1,0 +1,13 @@
+#!/bin/bash
+
+MY_DIR=$(readlink -f "$(dirname $0)"/)
+GCC_COMP=$(which gcc)
+
+if [ ! -x $GCC_COMP ]; then
+   echo
+   echo "ERROR: I cant find gcc compiler!"
+   echo
+   exit
+fi
+
+$GCC_COMP -g2 -o $MY_DIR/tfshow $MY_DIR/src/tfshow.c -lpcap -lpthread

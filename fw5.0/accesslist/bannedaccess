@@ -1,0 +1,23 @@
+#  FwGuardian 5.0 (2014)
+#
+#  - Banned access (drop in POSTROUTING chain)
+#  - You can bypass only with fwhost file
+#
+#  To reload: 
+#     ./fwguardian --reload-banned access
+#
+#  To enable this module:
+#     ./fwguardian --enable bannedfw
+#
+port tcp 1863
+port tcp 6667
+
+net 65.139.134.0/24
+net 198.173.255.0/24
+net 209.245.76.0/24
+net 217.21.114.0/24
+net 212.26.221.13
+net 81.169.128.0/20
+net 216.129.113.10
+
+resolv orkut.com

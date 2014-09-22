@@ -1,0 +1,20 @@
+
+#page {
+	width: 900px;
+	margin: 0 auto;
+	overflow: hidden;
+	zoom: 1;
+}
+
+
+.divider { border-bottom: 2px solid #ccc; clear: both; }
+
+.mooBar_realTime_body, .topbar a {
+	-webkit-border-radius: 5px 5px 5px;
+	-moz-border-radius: 5px 5px 5px;
+	border-radius: 5px 5px 5px;
+}
+
+
+.topbar_link a{
+}

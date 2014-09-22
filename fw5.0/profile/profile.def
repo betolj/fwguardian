@@ -1,0 +1,119 @@
+#  FwGuardian 5.0 (2014)
+#
+#  - Profile sintaxe
+#       set-policy <profile_name>
+#          <from|to> <if>  <proto>  <proto_opt|ports>           <target>  <from|to> <ip_addr>
+#
+#    target:
+#          ACCEPT|DROP|REJECT:RETURN:IGNORE                     Access targets
+#          CONNLIMIT|PKTLIMIT                                   Limit targets
+#
+#
+#   - Examples
+#     Bypass rsquid or vpop3 (only IGNORE or RETURN target):
+#        set-policy rsquid	
+#           from  eth0  any       any                           IGNORE    from 10.0.0.10
+#           from  eth0  any       any                           IGNORE    from 10.0.0.11
+#           from  eth0  src_addr  10.0.0.1,10.0.0.2             IGNORE    to   any
+#
+#     With gplist you can defined a profile per IP:
+#           from  any   src_addr  10.0.0.1,10.0.0.2             ACCEPT    to any log
+#
+#     VPN profiles or mangle profiles:
+#        set-policy vpn:Fvpn
+#        set-policy vpn:Fvpn2
+#
+#     Anti-flood limit (hashlimit):
+#        set-policy limit:NScan
+#            to  any   tcp    135:139,389,445            PKTLIMIT  to any  10/s,3 flow=tNBTScan/srcip,dstport
+#
+#     Simultaneous connections (useful in P2P):
+#        set-policy limit:CLimit
+#            to  any   tcp    any                        CONNLIMIT to any    15/32
+#
+
+set-policy limit:NScan
+to   any       gre       any                                                            RETURN             to   any
+to   any       ah        any                                                            RETURN             to   any
+to   any       esp       any                                                            RETURN             to   any
+to   any       tcp       135:139,389,445                                                PKTLIMIT           to   any	 10/s,10 flow=tNBTScan/srcip,dstport new desc="NBT pkt limits"
+to   any       udp       135:139,389,445                                                PKTLIMIT           to   any	 10/s,10 flow=uNBTScan/srcip,dstport new desc="NBT pkt limits"
+to   any       tcp       any                                                            PKTLIMIT           to   any	 8/s,10 flow=tcpscan/srcip,dstport new desc="TCP pkt limits"
+to   any       udp       any                                                            PKTLIMIT           to   any	 6/s,10 flow=udpscan/srcip,dstport new desc="UDP pkt limits"
+to   any       icmp      any                                                            PKTLIMIT           to   any	 3/s,6 flow=icmpscan/srcip new desc="ICMP pkt limits"
+
+set-policy limit:hostTcpLimit
+to   any       dst_addr  200.200.200.1                                                  RETURN             to   any      desc="your host1" chk=disabled
+to   any       dst_addr  200.200.200.2                                                  RETURN             to   any      desc="your host2" chk=disabled
+to   any       any       any                                                            CONNLIMIT          to   any      80/32 desc="TCP connection limit (CONNLIMIT)"
+to   any       src_geoip BR                                                             CONNLIMIT          to   any      160/32 desc="TCP connection limit (CONNLIMIT)" chk=disabled
+
+set-policy limit:CLimit
+to   any       gre       any                                                            RETURN             from any      desc="CONNLIMIT bypass"
+to   any       ah        any                                                            RETURN             from any      desc="CONNLIMIT bypass"
+to   any       esp       any                                                            RETURN             from any      desc="CONNLIMIT bypass"
+to   any       tcp       1863,443,80                                                    RETURN             from any	 desc="CONNLIMIT bypass" chk=disabled
+to   any       tcp       any                                                            hostTcpLimit       to   any      desc="TCP connection limit (CONNLIMIT)"
+to   any       tcp       any                                                            CONNLIMIT          to   any      400/20 desc="TCP conn limit prefix-20"
+to   any       udp       any                                                            CONNLIMIT          to   any      30/32 desc="UDP connection limit (CONNLIMIT)"
+to   any       icmp      any                                                            CONNLIMIT          to   any      10/32 desc="ICMP connection limit (CONNLIMIT)"
+
+set-policy limit:synlimit
+from any       tcp       any                                                            PKTLIMIT           to   any      50/s,70 flow=synlm/srcip desc="TCP SYN Limit"
+from any       src_geoip BR                                                             PKTLIMIT           to   any      60/s,120 flow=synlm/srcip desc="TCP SYN Limit" chk=disabled
+
+set-policy limit:droplimit
+to   any       tcp       any                                                            PKTLIMIT           to   any	 30/s,40 flow=srcip,dstip,dstport desc="DROP limits to DropStr profile"
+
+set-policy limit:dropgeo chk=disabled
+from any       tcp       25,587,110                                                     RETURN             from any
+from any       dst_addr  200.200.200.1,200.200.200.2                                    RETURN             to   any
+from any       src_geoip BR                                                             RETURN             to   any
+from any       src_addr  74.86.158.106,74.86.158.107,74.86.158.108,74.86.158.109        RETURN             from any     desc="uptimerobot.com"
+from any       src_addr  74.86.158.110,46.137.190.132,122.248.234.23,188.226.183.141    RETURN             from any     desc="uptimerobot.com"
+from any       src_addr  178.62.52.237,54.79.28.129,54.94.142.218                       RETURN             from any     desc="uptimerobot.com"
+from any       udp       53                                                             RETURN             from any
+
+set-policy rsquid chk=disabled
+from eth0      src_addr  10.0.0.1                                                       RETURN             to   any	 desc="Bypass transp. proxy"
+from eth0      dst_addr  200.201.160.0/20                                               RETURN             to   any      desc="Bypass transp. proxy"
+from eth0      src_addr  10.0.1.0/24                                                    DROP               to   any	 desc="DROP access"
+
+set-policy Fdba chk=disabled
+to   any       tcp       ftp,ftp-data,ssh,netbios-ssn,smtp,pop3,6000,1041,1025,119,1521 ACCEPT             to   any	
+to   any       udp       netbios-ssn,netbios-ns,netbios-dgm,119,53,123                  ACCEPT             to   any	
+
+set-policy Fprog
+to   eth0      any       any                                                            RETURN             to   200.1.2.3	chk=disabled
+to   any       tcp       ftp,ftp-data,smtp,ssmtp,pop3,pop3s,8080,1041,1025,119,1521     ACCEPT             to   any	
+to   any       udp       119,53,123                                                     ACCEPT             to   any	
+
+set-policy MgrUser chk=disabled
+from any       src_addr  10.0.0.1,10.0.0.2                                              ACCEPT             to   any	 log
+from any       src_addr  10.0.0.10,10.0.0.11                                            ACCEPT             to   any	 log
+
+set-policy limit:DropP2P
+
+set-policy mangle:DropP2P chk=disabled
+
+set-policy DropStr
+to   any       tcp       any                                                            DROP               to   any	 string="realtime.services.disqus.com"
+to   any       tcp       any                                                            DROP               to   any	 string="update2/octoshapeold/win32"
+to   any       tcp       any                                                            DROP               to   any	 string="octoshape.net"
+to   any       tcp       any                                                            DROP               to   any	 string="webspectator.com"
+to   any       tcp       any                                                            DROP               to   any	 string="drive.google.com"  chk=disabled
+to   any       tcp       any                                                            DROP               to   any	 string="storage.conduit.com"
+to   any       tcp       any                                                            DROP               to   any	 string="ask.com/widget/celebrity"
+to   any       tcp       any                                                            REJECT             to   any	 string=".realtime.livehtml.net"
+to   any       tcp       any                                                            droplimit          to   any	 string="hotwords.com.br"
+to   any       tcp       any                                                            droplimit          to   any	 string=".ig.com.br"
+to   any       tcp       any                                                            droplimit          to   any	 string=".yahoo.com"
+to   any       tcp       any                                                            droplimit          to   any	 string=".gravatar.com"
+to   any       tcp       any                                                            droplimit          to   any      string=".imageshack.us"
+to   any       tcp       any                                                            droplimit          to   any	 string=".g.doubleclick.net"
+to   any       tcp       any                                                            droplimit          to   any	 string=".scorecardresearch.com"
+to   any       tcp       any                                                            droplimit          to   any	 string=".java.net"
+to   any       tcp       any                                                            droplimit          to   any	 string=".cvc.com.br"
+to   any       tcp       any                                                            droplimit          to   any	 string=".youtube.com"
+to   any       tcp       any                                                            droplimit          to   any	 string=".facebook.com"
+to   any       tcp       any                                                            droplimit          to   any	 string=".sescms.com.br"

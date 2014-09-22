@@ -1,0 +1,8 @@
+#!/usr/sbin/setkey -f
+
+spdadd <bind>[1701] 0.0.0.0/0[1701] udp -P out ipsec
+    esp/transport//require;
+
+spdadd 0.0.0.0/0[1701] <bind>[1701] udp -P in ipsec
+    esp/transport//require;
+

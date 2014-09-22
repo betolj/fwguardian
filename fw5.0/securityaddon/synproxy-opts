@@ -1,0 +1,8 @@
+#
+# TCP SYNPROXY options
+#
+# - Allow sack          "--sack-perm"
+# - Set wscale          "--wscale <n>"
+# - Set tcp mss         "--mss <mtu-40>"
+#
+TCPOPT="--sack-perm --mss 1450"

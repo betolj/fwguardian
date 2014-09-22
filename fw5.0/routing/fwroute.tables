@@ -1,0 +1,104 @@
+#  FwGuardian 5.0 (2014)
+#
+#  Mandatory config sequence: set, set-link and set-policy
+#
+#  1. Making the system adjustments (optional):
+#
+#    - Configure network address table lookup (by source)
+#        set route.from [ip|net|none]
+#        **Default**: net
+#
+#    - Modifying the routing cache or ipset timeout (gc_timeout)
+#        set lb.keepalive.timeout <time.seconds>
+#        **Default**: 300
+#
+#    - "Equalize" routing (per connection)
+#        set lb.equalize [on|off]
+#
+#    Examples:
+#      set route.source net
+#      set lb.keepalive.timeout 600
+#      set lb.equalize off
+#
+#
+#  2. Creating the routing TABLES (set-link)
+#
+#     set link
+#       <if_gw>   <network_gw>   <ip_addr_gw>     <table_name>   <dgd_addr>   <options> [chk=condition]
+#
+#    Dead gateway detection (link fail-over)
+#    - Make availability tests from this IPs.
+#    - Configure a ip addr in <dgd_addr> to implement a "dead gateway detection".
+#
+#    Ps.: UP to 2 links: "works only" with Julian Anastasov patch (if kernel < 3.6)
+#
+#    Options:
+#       lbgroup=<table_name:weight>   Define this path into load balance table
+#       fogroup=<table_name:weight>   Define this path into fail-over table
+#       prio=<prio_number>            Use a fixed prio number for this table (ignore "set counters") 
+#       only-iproute                  Dont add a RPDB mark rule for this table
+#       onlytb|only-table             Only create the routing table (without RPDB rules)
+#       onfail-prohibit               Add a prohibit route in this table (send a admin prohibit message) - fail-over
+#       onfail-blackhole              Add a blackhole route in this table (drop packet silently) - fail-over
+#       onfail-throw                  Add a throw route in this table (continue with table lookup) - fail-over
+#
+#    Ps.: Configure largest weight for largest bandwidths.
+#
+#
+#  3. Routing decisions (RULES):
+#
+#  There are two ways to make this rules.
+#
+#  - iproute classification (set-policy iproute)
+#
+#    set-policy iproute
+#    <if_in->if_out>   <src_ipaddr>  <dst_ipaddr>              <table_name>         <options>
+#
+#    Iproute options:
+#       prio=<prio_sequence>   sequence number in RPDB (ignore "set counters")
+#       masq                   make MASQUERADE rule (require if_out)
+#       autosnat               make SNAT rule (require if_out)
+#
+#    Warning: Route decisions are based in RPDB sequence (prio).
+#
+#
+#  - netfilter classification (set-policy netfilter)
+#
+#    set-policy netfilter
+#    <if_in->if_out>   <src_ipaddr>  <dst_ipaddr>              <table_name>         <options>
+#
+#    Netfilter options:
+#       port=<proto>/<port>    make rule for destination proto/port (you can use dport)
+#       sport=<proto>/<port>   make rule for source proto/port (use same proto for sport/port)
+#       masq                   make MASQUERADE rule (require if_out)
+#       autosnat               make SNAT rule (require if_out)
+#
+#    Warning: Depends of last MARK processed. 
+#             See the fwmark sequence in RPDB (ip rule ls).
+#
+#    Select the routing table using netfilter (in netfilter policy):
+#    eth1        10.0.0.10      200.1.2.3          link1  port=tcp/110,25
+#
+#
+#    Ps.: The multiport setting works only in netfilter policy
+#         The policy sequence will define the prefer prio routing between iproute and netfilter
+#
+
+set route.source net
+set lb.keepalive.timeout 600
+set lb.equalize off
+
+set-link chk=disabled
+ifwan                192.168.1.0/24       192.168.1.1          link1                200.1.1.1            lbgroup=rtbalance:2 fogroup=fover
+ifwan                192.168.2.0/24       192.168.2.1          link2                200.1.1.2            lbgroup=rtbalance:1
+ppp0                 auto                 auto                 link3                200.1.1.3            fogroup=fover chk=disabled
+
+set-policy iproute chk=disabled
+any                  10.0.0.1             any                  link1
+any->eth2            10.0.0.2             200.1.2.3            link2                masq
+any->eth0            10.0.0.3             200.1.2.3            link1                autosnat
+
+set-policy netfilter chk=disabled
+eth1                 10.0.0.20            any                  link1
+any                  10.0.0.0/24          any                  link1                dport=udp/53
+

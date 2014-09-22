@@ -1,0 +1,2 @@
+*/5 * * * * root  nice perl /usr/share/fwguardian/webauth/rrd/rrd_collect.pl --system >/dev/null
+*/3 * * * * root  nice perl /usr/share/fwguardian/webauth/rrd/rrd_collect.pl --interfaces >/dev/null

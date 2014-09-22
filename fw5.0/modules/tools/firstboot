@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+# Copyright (c) 2014 Humberto Jucá <betolj@gmail.com>
+#
+# This file is part of FwGuardian Turnkey Linux
+#
+# firstboot is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 3 of the License, or (at your
+# option) any later version.
+
+### BEGIN INIT INFO
+# Provides:          firstboot
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     2
+# Default-Stop:      0
+# Short-Description: firstboot startup and shutdown init script (after install)
+# Description:       Updates on startup, releases on shutdown if initialized
+### END INIT INFO
+
+. /lib/lsb/init-functions
+. /etc/default/inithooks
+
+# exit if not exist /etc/default/first boot
+[ -f /etc/default/firstboot ] || exit 0
+
+[ -f /etc/default/fwguardian ] && . /etc/default/fwguardian || FW_DIR="/opt/fw5.0"
+
+case "$1" in
+  start)
+	log_begin_msg "Updating $DESC" "firstboot"
+	# Redefine default shell to bash
+	rm -f /bin/sh
+	ln -sf /bin/bash /bin/sh
+
+	# Disable resolveconf and hubdns services
+	sudo update-rc.d -f resolvconf remove
+	sudo update-rc.d -f hubdns disable
+	sudo apt-get -q -y remove resolvconf
+	rm -f /etc/resolv.conf
+
+        # Update shellinabox links
+        sudo update-rc.d -f shellinabox defaults
+
+        # Try to update linux kernel
+        lost=$(LANG=en ping 8.8.8.8 -c2 -w2 2>&1 2>/dev/null | grep packet | sed 's/.*received//; s/ packet.*//; s/.* errors, //' | tr -d '[, ]')
+        if [ "$lost" == "0%" ]; then
+	   dialog --title "Update kernel - this need a active Internet Connection" --backtitle "Update kernel with wheezy-backports mirror" --defaultno --yesno "Would you like update your linux kernel using wheezy-backports to add SYNPROXY support? (Y/n)" 7 60
+	   [ "$?" == 0 ] && doupdate="y" || doupdate="no"
+
+	   if [ "$doupdate" != "no" ]; then
+	      echo "Wait a minute, please..."
+	      echo "deb http://ftp.debian.org/debian testing main contrib non-free" > /etc/apt/sources.list.d/unstable.sources.list
+	      echo "deb http://ftp.debian.org/debian/ unstable main" >> /etc/apt/sources.list.d/unstable.sources.list
+	      echo "deb http://ftp.debian.org/debian/ wheezy-backports main" >> /etc/apt/sources.list.d/unstable.sources.list
+	      echo "deb-src http://http.us.debian.org/debian unstable main" >> /etc/apt/sources.list.d/unstable.sources.list
+	      sudo apt-get -y update
+	      sudo apt-get -y -t wheezy-backports install linux-image-amd64
+	      sudo apt-get -y -t testing install iptables xtables-addons-common
+           fi
+        fi
+
+        # Set 127.0.1.1 firewall hostname and resolv conf
+	echo "fwguardian.localdomain" > /etc/hostname
+        sed -i "s/\s\+fwguardian.*/ fwguardian.localdomain fwguardian/" /etc/hosts
+        $FW_DIR/webauth/chsystem /etc/hosts update-host fwguardian.localdomain 127.0.1.1
+        $FW_DIR/modules/tools/tfshow/build
+cat > /etc/resolv.conf <<EOF
+options timeout:3
+search localdomain
+nameserver 127.0.0.1
+EOF
+
+	# Configure default system locale, timezone and keyboard
+	dpkg-reconfigure locales
+	dpkg-reconfigure tzdata
+	dpkg-reconfigure keyboard-configuration
+
+        # Disable kibana if MemTotal < 2048Mb
+        memtotal=$(grep MemTotal /proc/meminfo | awk '{ print $2; }')
+        if [ "$memtotal" -lt 2049000 ]; then
+           dialog --title "May be a bad memory usage if you enable Kibana3" --backtitle "Low memory warning (less then 2048Mb)" --defaultno --yesno "Would you like *enable* Kibana3 IPS Dashboard anyway? (Y/n)" 7 60
+           [ "$?" == 0 ] && doupdate="y" || doupdate="no"
+
+           if [ "$doupdate" == "no" ]; then
+              sudo update-rc.d -f logstash remove
+              sudo update-rc.d -f elasticsearch remove
+              /usr/sbin/nginx_modsite -d kibana3
+           fi
+        fi
+
+	rm -f /etc/default/firstboot 2>/dev/null
+        update-grub
+
+	log_action_end_msg $?
+        update-rc.d -f firstboot remove 1>/dev/null 2>/dev/null
+        reboot
+    ;;
+
+  stop)
+    exit 0
+    ;;
+
+  restart|reload|force-reload)
+    echo "Error: argument '$1' not supported" >&2
+    exit 3
+    ;;
+
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
+

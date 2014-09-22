@@ -1,0 +1,293 @@
+#!/bin/bash
+#
+# (C) 2014 by Humberto L Jucá <betolj@gmail.com>
+#
+# This software may be used and distributed according to the terms
+# of the GNU General Public License, incorporated herein by reference.
+#
+# infra.pl plugin for system changes
+#  - Set hostname
+#  - Set resolv.conf and dns server
+#  - Enable/disable ipv6 support
+#  - Windows integration (NTLM/Kerberos)
+#
+# Tested on Ubuntu server
+#
+
+
+sfile=$1
+stype=$2
+[ ! -f "$sfile" ] && exit
+
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+shift 2
+sopts=$@
+logger=$(which logger)
+updaterc=$(which update-rc.d)
+
+function ipv4prec() {
+   sed -i '/.*precedence\s\+::ffff:0:0\/96\s\+100/ s/.*/\#precedence ::ffff:0:0\/96  100/' /etc/gai.conf
+   if [ "$1" == "yes" ]; then
+      grep '::ffff:0:0/96' /etc/gai.conf >/dev/null && \
+         sed -i '/.*precedence\s\+::ffff:0:0\/96\s\+100/ s/.*/precedence ::ffff:0:0\/96  100/' /etc/gai.conf || \
+         echo 'precedence ::ffff:0:0/96  100' >> /etc/gai.conf
+   fi
+}
+
+case $stype in
+   update-host)
+      arrHost=(${sopts// / })
+      auxname=$(hostname -f)
+      auxip=$(hostname -i | cut -d ' ' -f1)
+
+      # Setting default system shell (/bin/sh)
+      chkfile=$(readlink /bin/sh)
+      if [ "$chkfile" != "" ] && [ "$chkfile" != "/bin/bash" ] && [ "$chkfile" != "bash" ]; then
+         rm -f /bin/sh
+         ln -sf /bin/bash /bin/sh
+      fi
+
+      # Setting the firewall hostname and pref IP
+      echo "${arrHost[0]}" > /etc/hostname
+      [ -f "/etc/sysconfig/network" ] && sed -i "s/HOSTNAME=.*/HOSTNAME=${arrHost[0]}/" /etc/sysconfig/network
+      sed -i "/^$auxip\s/ s/\s$auxname\b/\t${arrHost[0]}/" /etc/hosts
+      hostname ${arrHost[0]}
+
+      [ "${arrHost[1]}" != "$auxip" ] && sed -i "/\s${arrHost[0]}/ s/^\s*$auxip\t/${arrHost[1]}\t/" /etc/hosts
+
+      # Remove ufw and disable iptables service if exit
+      if [ -f "$updaterc" ]; then
+         ufw=$(which ufw)
+         if [ -f "$ufw" ]; then
+            update-rc.d -f ufw remove 2>&1 >/dev/null 
+            apt-get remove ufw 2>&1 >/dev/null
+            dpkg --purge ufw 2>&1 >/dev/null
+         fi
+         update-rc.d -f iptables remove 2>&1 >/dev/null 
+      else
+         chkconfig iptables off 2>&1 >/dev/null
+      fi
+
+      $logger -i -p daemon.info -t "fwguardian(webauth):" "INFO: Setting firewall hostname to ${arrHost[0]}"
+      $logger -i -p daemon.info -t "fwguardian(webauth):" "INFO: Setting firewall main IP address to ${arrHost[1]}"
+   ;;
+   update-resolv)
+      #0 - domainName, 1 - resTimeout, 2 - resAttempts, 3 - domainSearch
+      arrResolv=(${sopts// / })
+
+      shift 3
+      lresolv=$@
+
+      # Remove resolv.conf symbolic link and disable resolvconf daemon
+      chkfile=$(readlink /etc/resolv.conf)
+      if [ "$chkfile" != "" ]; then
+         cp -f /etc/resolv.conf /tmp/
+         rm -f /etc/resolv.conf
+         cp -f /tmp/resolv.conf /etc/
+         rm -f /tmp/resolv.conf
+         [ -f "$updaterc" ] && update-rc.d -f resolvconf remove 2>&1 >/dev/null
+      fi
+
+      # Update /etc/resolv.conf file 
+      echo -e ",g/^\s*\(nameserver\|search\|domain\|options\)\s/d\nw\nq" | ed /etc/resolv.conf
+      [ "${arrResolv[1]}" -gt 0 ] && [ "${arrResolv[1]}" != "5" ] && echo "options timeout:${arrResolv[1]}" >> /etc/resolv.conf
+      [ "${arrResolv[2]}" -gt 0 ] && [ "${arrResolv[2]}" != "2" ] && echo "options attempts:${arrResolv[2]}" >> /etc/resolv.conf
+
+      [ "${arrResolv[0]}" != "none" ] && [ "${arrResolv[0]}" != "${arrResolv[3]}" ] && echo "domain ${arrResolv[0]}" >> /etc/resolv.conf
+      [ "${arrResolv[3]}" != "none" ] && echo "search $lresolv" >> /etc/resolv.conf
+      rm -f /tmp/nameserver.named 2>/dev/null
+      rm -f /tmp/domainserver.named 2>/dev/null
+
+      $logger -i -p daemon.info -t "fwguardian(webauth):" "INFO: Setting /etc/resolv.conf"
+   ;;
+   add-nameserver)
+      echo "nameserver $sopts" >> /etc/resolv.conf
+   ;;
+   add-tmpnserver)
+      echo "$sopts" > /tmp/nameserver.named
+   ;;
+   add-tmpdserver)
+      echo "$sopts" > /tmp/domainserver.named
+   ;;
+   update-nameoptions)
+      arrResolv=(${sopts// / })
+      dserver=$(cat /tmp/domainserver.named 2>/dev/null)
+      nserver=$(cat /tmp/nameserver.named 2>/dev/null)
+      [ "$nserver" == "" ] && nserver="127.0.0.1"
+
+      localzone=""
+      [ -f "/tmp/domainserver.named" ] && localzone="${arrResolv[0]}.localzone"
+
+      #0 - $FW_DIR/addon/named.conf, 1 - chkIpv6, 2 - domainName e 3 - RestTimeout
+      # IPV6 support
+      if [ "${arrResolv[1]}" == "no" ]; then
+         sfile="${arrResolv[0]}.options.ipv6"
+         if [ -f "/etc/init.d/bind9" ] || [ -f "/etc/init.d/named" ]; then
+            [ -x "/etc/init.d/bind9" ] && sed -i '/RESOLVCONF/ s/RESOLVCONF=.*/RESOLVCONF=no/; /OPTIONS/ s/-4 //' /etc/default/bind9 || \
+                                          sed -i '/OPTIONS/ s/-4//' /etc/sysconfig/named 2>/dev/null
+         fi
+      else
+         sfile="${arrResolv[0]}.options.ipv4"
+         if [ -f "/etc/init.d/bind9" ] || [ -f "/etc/init.d/named" ]; then
+            [ -x "/etc/init.d/bind9" ] && sed -i '/RESOLVCONF/ s/RESOLVCONF=.*/RESOLVCONF=no/; /OPTIONS/ s/-4 //; /OPTIONS/ s/OPTIONS=\"/OPTIONS=\"-4 /' /etc/default/bind9 || \
+                                          sed -i '/OPTIONS/ s/-4//; /OPTIONS/ s/.*/OPTIONS=\\"-4\\"/' /etc/sysconfig/named
+         fi
+      fi
+
+      # Set local domain (remove DNS rebind protect)
+      if [ -f /etc/bind/localdomains ]; then
+         localdom=$(cat /etc/bind/localdomains | grep -v "\b${arrResolv[2]}\($\|\s+\)" | sed "s/\b${arrResolv[2]}\s\+//" | tr '\n' ' ' | sed 's/ \$//')
+         localdom="local-zone $localdom"
+      else
+         localdom="local-zone"
+      fi
+
+      echo "// FwGuardian: Setting local domains " > /etc/bind/named.conf.fglocal;
+      for i in $(echo $localdom); do
+         [ "$i" == "local-zone" ] && ldom=${arrResolv[2]} || ldom=$i
+         cat $localzone | sed "s/local-zone/$ldom/;" | \
+         awk -v lservers="$dserver" 'BEGIN { split(lservers, alservers, " |\t"); } { if ($1 != "127.0.1.1;") print $0; else for (i in alservers) if (alservers[i] != "") print "\t\t"alservers[i]";"; } END { print '\n'; }' >> /etc/bind/named.conf.fglocal
+      done
+      echo $dserver > /etc/bind/localresolvers
+
+
+      # Setting bind options (only /etc/bind/named.conf.option)
+      localdom=$(echo $localdom | sed 's/ /"; "/g')
+      if [ "$(grep '^[\s]*127.0.0.' /tmp/nameserver.named | wc -l)" -gt 0 ]; then
+         cat $sfile.hint | sed "/deny-answer-/ s/local-zone/$localdom/; s/local-zone/${arrResolv[2]}/; /resolver-query-timeout/ s/5/${arrResolv[3]}/" > /etc/bind/named.conf.options
+      else
+         cat $sfile | sed "/deny-answer-/ s/local-zone/$localdom/; s/local-zone/${arrResolv[2]}/; /resolver-query-timeout/ s/5/${arrResolv[3]}/" | \
+         awk -v servers="$nserver" -v lservers="$dserver" 'BEGIN { split(servers, aservers, " |\t"); } { if ($1 != "8.8.8.8;") print $0; else for (i in aservers) if (aservers[i] != "") print "\t\t"aservers[i]";"; }' > /etc/bind/named.conf.options
+      fi
+      rm -f /tmp/nameserver.named 2>/dev/null
+      rm -f /tmp/domainserver.named 2>/dev/null
+
+      # Restart bind daemon
+      if [ -f "/etc/init.d/bind9" ] || [ -f "/etc/init.d/named" ]; then
+         [ -x "/etc/init.d/bind9" ] && service bind9 restart 2>/dev/null || service named restart 2>/dev/null
+      fi
+   ;;
+   dc-join)
+      net=$(which net)
+      arrJoin=(${sopts// / })
+      #0 - fwdir, 1 - dcType, 2 - domainName, 3 - realmName, 4 - dcLogin, 5 - dcPasswd, 6 - dcserver e dcAddress
+
+      if [ -f "$net" ]; then
+         FW_DIR=${arrJoin[0]}
+         declare -u urealm
+         declare -l lrealm
+         urealm=${arrJoin[3]}
+         lrealm=$urealm
+
+         # Configure smb.conf (NTLM support)
+         dwins=""
+         dtype="domain"
+         [ "${arrJoin[1]}" == "ad" ] && dtype="ads"
+         [ "${arrJoin[6]}" != "all" ] && dwins="wins server = ${arrJoin[6]}"
+         cat $FW_DIR/addon/smb.conf | \
+             sed "/DEF_REALM/ s/DEF_REALM/$urealm/g; /\#wins server / s/.*/   $dwins/; /dctype/ s/dctype/$dtype/" > /etc/samba/smb.conf
+
+         shift 7
+         dcaddr=$@
+         [ "$dcaddr" == "" ] && dcaddr="0.0.0.0"
+         echo "${arrJoin[1]} $dcaddr" > $FW_DIR/addon/dctype
+         echo "${arrJoin[4]}" > $FW_DIR/addon/dcaccount
+
+         # Setting proxy into winbindd_priv group
+         gpasswd -a proxy winbindd_priv
+
+         # Kerberos support and domain join
+         if [ "${arrJoin[1]}" == "ad" ] || [ "${arrJoin[1]}" == "rpc/krb" ]; then
+            msktutil=$(which msktutil)
+
+            if [ -f "$FW_DIR/addon/krb5.conf" ] && [ -f "$msktutil" ]; then
+               nbtname=$(hostname -s)
+               nbtname="sqk-$nbtname"
+
+               # Configure krb5.conf and include local domain in krb realm
+               if [ "${arrJoin[6]}" != "all" ]; then
+                  cat $FW_DIR/addon/krb5.conf | sed "/DEF_REALM/ s/DEF_REALM/$urealm/g; /def_realm/ s/def_realm/$lrealm/g" | \
+                  awk -v servers="$dcaddr" -v dcserver=${arrJoin[6]} 'BEGIN { split(servers, aservers, " |\t"); } { if ($3 != "kdc-server") print $0; else { for (i in aservers) if (aservers[i] != "") print "\t\tkdc = "aservers[i]; print "\t\tadmin_server = "dcserver; } }' > /etc/krb5.conf
+                  if [ "${arrJoin[2]}" != "${arrJoin[3]}" ]; then
+                     echo "\t\.${arrJoin[2]} = $urealm" >> /etc/krb5.conf
+                     echo "\t${arrJoin[2]} = $urealm" >> /etc/krb5.conf
+                  fi
+                  enc="--enctypes 28"
+                  [ -f "/tmp/dc.2003" ] && enc=""
+                  echo "${arrJoin[5]}" | kinit ${arrJoin[4]} | $logger -i -t "fwguardian(webauth)/kinit"
+
+                  # Creating the keytab file
+                  rm -f /etc/squid/PROXY.keytab 2>/dev/null
+                  $msktutil -c -s HTTP/$(hostname -f) \
+                       -k /etc/squid/PROXY.keytab --computer-name $nbtname \
+                       --upn HTTP/$(hostname -f) --server ${arrJoin[6]} --verbose $enc | $logger -i -t "fwguardian(webauth)/msktutil"
+                  chown proxy.root /etc/squid/PROXY.keytab
+                  chmod 400 /etc/squid/PROXY.keytab
+
+                  echo "msktutil --auto-update --verbose --computer-name $nbtname | $logger -i -t \"fwguardian(webauth)/msktutil\"" >> /etc/cron.daily/msktutil
+                  chmod +x /etc/cron.daily/msktutil
+               else
+                  echo "none $dcaddr" > $FW_DIR/addon/dctype
+                  $logger -i -p daemon.info -t "fwguardian(webauth):" "ERROR: Set your dc address to add kerberos support!"
+                  exit
+               fi
+            else
+               echo "none $dcaddr" > $FW_DIR/addon/dctype
+               $logger -i -p daemon.info -t "fwguardian(webauth):" "ERROR: Sorry, no kerberos support into your firewall system!"
+               exit
+            fi
+
+            if [ "${arrJoin[1]}" == "ad" ]; then
+               echo "${arrJoin[5]}" | $net ads join -U ${arrJoin[4]}%$(xargs) 2>&1 | $logger -i -t "fwguardian(webauth)/net-join(ad):"
+            else
+               echo "${arrJoin[5]}" | $net rpc join -U ${arrJoin[4]}%$(xargs) 2>&1 | $logger -i -t "fwguardian(webauth)/net-join(rpc/krb):"
+            fi
+            kdestroy 2>/dev/null
+         else
+            echo "${arrJoin[5]}" | $net rpc join -U ${arrJoin[4]}%$(xargs) 2>&1 | $logger -i -t "fwguardian(webauth)/net-join(rpc):"
+         fi
+         wbinfo -t 2>&1 | $logger -i -t "fwguardian(webauth)/wbinfo-t:"
+      fi
+   ;;
+   disable-ipv6)
+      if [ -f "/etc/default/grub" ]; then
+         upd=$(grep '[\s]*GRUB.* ipv6.disable=1' /etc/default/grub >/dev/null && echo 0 || echo 1)
+         if [ "$upd" == "1" ]; then
+            sed -i '/GRUB_CMDLINE_LINUX_DEFAULT/ s/ipv6.disable=1//g; /GRUB_CMDLINE_LINUX_DEFAULT/ s/\"$/ipv6.disable=1\"/' /etc/default/grub
+            /usr/sbin/update-grub | $logger -i -t "fwguardian(webauth)/update-grub(ipv4):"
+         fi
+      else
+         echo -e ",g/^\s*net\.ipv6\..*\.disable_ipv6/d\nw\nq" | ed /etc/sysctl.conf
+         if [ -e "/proc/sys/net/ipv6/conf/default/disable_ipv6" ]; then
+            echo '#disable_ipv6' >> /etc/sysctl.conf
+            echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf
+            echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> /etc/sysctl.conf
+            echo 'net.ipv6.conf.lo.disable_ipv6 = 1' >> /etc/sysctl.conf
+         fi
+         [ -f "/etc/sysconfig/network" ] && sed -i "s/NETWORKING_IPV6=.*/NETWORKING_IPV6=no/" /etc/sysconfig/network
+      fi
+      echo "options ipv6 disable=1 " > /etc/modprobe.d/blacklist-ipv6.conf
+      echo "blacklist ipv6" >> /etc/modprobe.d/blacklist-ipv6.conf
+      ipv4prec "yes"
+
+      $logger -i -t "fwguardian(webauth):" "Disable ipv6 support"
+   ;;
+   enable-ipv6)
+      if [ -f "/etc/default/grub" ]; then
+         upd=$(grep '[\s]*GRUB.* ipv6.disable=1' /etc/default/grub >/dev/null && echo 1 || echo 0)
+         if [ "$upd" == "1" ]; then
+            sed -i '/GRUB_CMDLINE_LINUX_DEFAULT/ s/ipv6.disable=1//g' /etc/default/grub
+            /usr/sbin/update-grub | $logger -i -t "fwguardian(webauth)/update-grub(ipv6):"
+         fi
+      else
+         [ -f "/etc/sysconfig/network" ] && sed -i "s/NETWORKING_IPV6=.*/NETWORKING_IPV6=yes/" /etc/sysconfig/network
+      fi
+      echo -e ",g/net\.ipv6\..*\.disable_ipv6/d\nw\nq" | ed /etc/sysctl.conf
+      rm -f /etc/modprobe.d/blacklist-ipv6.conf 2>/dev/null
+      ipv4prec "$sopts"
+
+      $logger -i -t "fwguardian(webauth):" "Enable ipv6 support"
+   ;;
+esac
+

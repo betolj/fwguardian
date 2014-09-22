@@ -1,0 +1,16 @@
+#  FwGuardian 5.0 (2014)
+#
+#  - IPs that we cant do any routing (prohibit)
+#  - Result "Network is unreachable"
+#
+#  To reload: 
+#    ./fwguardian --reload-banned routes
+#
+#  To enable this module:
+#    ./fwguardian --enable bannedfw
+# 
+72.21.57.84
+216.239.51.85
+216.239.51.86
+64.233.171.85
+64.233.171.86

@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# (C) 2014 by Humberto L Jucá <betolj@gmail.com>
+#
+# This software may be used and distributed according to the terms
+# of the GNU General Public License, incorporated herein by reference.
+#
+# Simple keepalived service control
+#
+
+[ "$1" != "run" ] && exit
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin
+
+cmd=$2;
+sh=$(which bash)
+keepalived=$(which keepalived 2>/dev/null)
+TMPFILES="/tmp/.vrrp /tmp/.healthcheckers"
+
+stop() {
+  if [ -f /var/run/keepalived.pid ]; then
+     kill $(cat /var/run/keepalived.pid 2>/dev/null) 2>/dev/null
+     rm -f /var/run/keepalived.pid 2>/dev/null
+  fi
+  for pid in $(pidof keepalived); do
+    kill $pid
+  done
+
+  rm -f /var/lock/keepalived.lock
+  [ "$cmd" == "stop" ] && exit
+}
+
+test -f "$keepalived" || {
+  echo -e "\t Unable to find keepalived daemon!"
+  exit
+}
+
+[ "$cmd" == "stop" ] || [ "$cmd" == "restart" ] && stop
+
+### Start keepalived if is not running
+if [ ! "$(pidof keepalived)" ] || [ "$cmd" == "restart" ]; then
+   # - Reset zumbi interfaces (its a keepalive bug?)
+   ls /sys/class/net | awk '/^vrrp\./ { print " ip link del "$1; }' | $sh - 2>/dev/null >/dev/null
+
+   # - Restart daemon
+   $keepalived -f /etc/keepalived/keepalived.conf -p /var/run/keepalived.pid -P
+   touch /var/lock/keepalived.lock
+fi
+

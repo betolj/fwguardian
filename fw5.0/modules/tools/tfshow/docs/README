@@ -1,0 +1,27 @@
+tfshow, by Humberto L Jucá, betolj@gmail.com
+------------------------------------------------------------
+
+
+DESCRIPTION
+-----------
+tfshow is a simple tool to traffic analyze or *tcp kill* (send
+tcp rst). I'm using with toolkit into fwguardian project.
+
+
+RUNNING (LINUX)
+---------------
+You configure it via command line parameters.
+
+Example:
+tfshow -i eth0
+
+
+PARAMETERS
+----------------
+command line       Description
+------------------------------------------------------------
+-i                 Sniffed interface
+-p                 Disable promisc mode
+-f                 Define a pcap filter
+-r                 Number of rows in display 
+-k                 Work in *tcp Kill* mode

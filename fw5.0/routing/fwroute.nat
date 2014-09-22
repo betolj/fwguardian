@@ -1,0 +1,32 @@
+#  FwGuardian 5.0 (2014)
+#
+#  Nat type (NAT policies):
+#    DNAT   - Define a destination NAT rule (redirects)
+#    SNAT   - Define a source NAT rule (SNAT or MASQUERADE)
+#    NETMAP - Define a network NAT translation or 1:1 NAT
+#
+#  Sintaxe:
+#    set-policy <nat-type>
+#    "<if_in>"->"<if_out>"  <ip_src> <ip_dst>  <Natted_address>  <options>
+#
+#  Options:
+#    port=<proto>/<port>         Set destination proto/port (you can use dport)
+#    sport=<proto>/<port>        Set source proto/port (use same proto for sport/port)
+#    with-masq                   Include a MASQUERADE rule in your DNAT rule
+#    only-dnat                   By default, a FORWARD rules will be made for DNAT rules
+#                                 - you can ignore this feature with "only-dnat" option
+#    log-desc="<desc>"           Enable log and use a specify log description
+#
+
+set-policy DNAT
+any                  0/0                                 200.30.31.32                        10.0.0.11	
+any->eth0            0/0                                 200.30.31.33                        10.0.0.12	 with-masq
+
+set-policy SNAT chk=disabled
+eth1                 0/0                                 200.10.20.30                        200.1.1.1	
+eth1                 0/0                                 200.11.21.31                        200.2.2.1	
+eth1                 0/0                                 200.11.22.32                        MASQ	 dport=tcp/22
+eth1                 0/0                                 200.11.22.33                        AUTO	 dport=tcp/22
+
+set-policy NETMAP chk=disabled
+eth0                 0/0                                 10.0.15.0/24                        10.0.5.0/24	

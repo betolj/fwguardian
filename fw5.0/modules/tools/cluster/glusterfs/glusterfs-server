@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# (C) 2014 by Humberto L Jucá <betolj@gmail.com>
+#
+# This software may be used and distributed according to the terms
+# of the GNU General Public License, incorporated herein by reference.
+#
+# Restart glusterfs service
+#  - Try to restaring with distro service command
+#
+
+[ "$1" != "start" ] && [ "$1" != "stop" ] && [ "$1" != "restart" ] && exit
+
+logger=$(which logger)
+service=$(which service)
+
+if [ -f "/etc/debian_version" ]; then
+   if [ -f "/etc/init/glusterfs-server.conf" ]; then
+      $service glusterfs-server $1 2>/dev/null >/dev/null
+   else
+      /etc/init.d/glusterfs-server $1 2>/dev/null >/dev/null
+   fi
+else
+   [ -f "/etc/init.d/glusterd" ] && $service glusterd $1 || \
+      $logger -i -p daemon.error -t "cluster.pl:" "I cant find glusterfs-server service script"
+fi
+

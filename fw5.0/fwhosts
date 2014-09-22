@@ -1,0 +1,30 @@
+#  FwGuardian 5.0 (2014)
+#
+#  host profile - FORWARD
+#
+#  1. Optional setup:
+#    - Configure a default log description for LOG targets.
+#      set log "description"
+#
+#    - Enable|disable protect feature (disabled by default)
+#      set protect [on|off] "<interfaces>"
+#
+#  2. Profile rules
+#
+#   Sintaxe (dont write the identification name with spaces):
+#     <identification_name>  <ip> <mac> <profile|LOG>  <options>
+#
+#   Options:
+#     protect     Deny all tcp-syn traffic with "IP x MAC" addr different
+#                 that in this config (needed for nobanned option).
+#
+#     nobanned    Create a bypass for bannedaccess.
+#     log         Log a possible IP-Spoof or changed ip address.
+#
+
+set protect on "eth0"
+set log "MAC changed"
+
+USU1                 10.0.0.3             00:03:90:B2:E2:B2    LOG                  log log-desc="test1234"
+USU2                 10.0.0.4             00:03:90:B2:E2:B2    Fprog               
+USU3                 10.0.0.5             00:03:90:C3:F3:C3    Fdba                 log protect nobanned
