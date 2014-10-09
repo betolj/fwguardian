@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-#Rev.1 - Version 5.0
+#Rev.1 - Version 5.1
 
 # "POST /admin/chtfilter.cgi" -> apply button
 sub chtfilter {
@@ -226,12 +226,24 @@ else {
 
     my $pubd = $targetHost;
     $pubd =~ s/:[0-9]+//;
-    if (-d "/var/lib/shellinabox" && $svsport) {
-       print FILE "   <object id='obj' data=\"https://$pubd:$bwport\"></object><BR />\n";
+    if (-e "/usr/share/fwguardian/webauth/control/ssl/certificate.pem" && $svsport) {
+       $pubd="https://$pubd" 
     }
     else {
-       print FILE "   <object id='obj' data=\"http://$pubd:$bwport\"></object><BR />\n";
+       $pubd="http://$pubd";
     }
+#    if (-d "/var/lib/shellinabox" && $svsport) {
+#       print FILE "   <object id='obj' data=\"https://$pubd:$bwport\"></object><BR />\n";
+#    }
+#    else {
+#       print FILE "   <object id='obj' data=\"http://$pubd:$bwport\"></object><BR />\n";
+#    }
+     if (-e "/tmp/sessions/cgisess_$read_cookie.app.shellinabox") {
+        print FILE "     <script type=\"text/javascript\">";
+        print FILE "          var geturl=\"$pubd\";";
+        print FILE "          if (geturl) window.open(\"$pubd:$bwport\", '_blank', 'toolbar=yes, scrollbars=yes, location=yes, resizable=yes, width='+screen.width+', height=700');";
+        print FILE "     </script>";
+     }
 }
 print FILE << "HTML";
   </DIV></body>

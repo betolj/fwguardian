@@ -40,7 +40,7 @@ if [ "$shell_cmd" == "start" ] || [ "$shell_cmd" == "starthttp" ]; then
       shellinabox=$(which shellinaboxd)
       if [ $shell_app == "bandwidth" ]; then
          scert="-t"
-         [ -d /var/lib/shellinabox ] && [ "$shell_cmd" == "start" ] && scert="-c /var/lib/shellinabox -g certssl"
+         [ -d /usr/share/fwguardian/webauth/control/ssl ] && [ "$shell_cmd" == "start" ] && scert="-c /usr/share/fwguardian/webauth/control/ssl"
          shell_sesscmd="/usr/share/fwguardian/webauth/bandwidth.sh $shell_sesscmd"
          echo $shellinabox --background=$shell_pid $scert --port=$shell_port -s \"/:fwguardian:nogroup:HOME:\"\'/bin/bash -c \"sudo $shell_sesscmd\"\' | $sh -
          $logger -i -p daemon.info -t "fwguardian(webauth):" "Loading shellinabox command *bandwidth*"

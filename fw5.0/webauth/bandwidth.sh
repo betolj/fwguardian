@@ -11,6 +11,7 @@
 #  - iptraf
 #  - ettercap
 #  - tcpdump
+#  - bmon
 #
 
 
@@ -24,6 +25,7 @@ bcmd[1]="pktstat"
 bcmd[2]="iptraf"
 bcmd[3]="ettercap"
 bcmd[4]="tcpdump"
+bcmd[5]="bmon"
 
 while :;
 do
@@ -36,14 +38,15 @@ do
    echo "2. iptraf"
    echo "3. ettercap"
    echo "4. tcpdump"
-   echo "5. Exit"
+   echo "5. bmon"
+   echo "6. Exit"
    echo
    read -p "==> " opc
    clear
    bapp=${bcmd[$opc]}
    bapp=$(which $bapp)
    tcpdump=$(which tcpdump)
-   [ ! -x "$bapp" ] && [ $opc -lt 5 ] && opc=4
+   [ ! -x "$bapp" ] && [ $opc -lt 6 ] && opc=4
 
    case "$opc" in
      0) $bapp -i $bif -f "$bpcap" -n ;;
@@ -52,6 +55,7 @@ do
         $bapp $auxif ;;
      3) $bapp -i $bif -u -C -f "$bpcap" ;;
      4) $tcpdump -i $bif "$bpcap" -n  ;;
+     5) $bapp -p $bif ;;
      *) exit 0 ;;
    esac
 done

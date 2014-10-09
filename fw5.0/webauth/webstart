@@ -94,6 +94,7 @@ if [ ! -f /usr/share/fwguardian/webauth/control/ssl/webauth.cert ] || \
   echo -e '\E[47;31m'"\033[1m - Trying to Make the server keys with: fwguardian --make-https-cert \033[0m"
   $FW_DIR/../fwguardian --make-https-cert
 fi
+[ ! -f /usr/share/fwguardian/webauth/control/ssl/certificate.pem ] && cat /usr/share/fwguardian/webauth/control/ssl/webauth.key  /usr/share/fwguardian/webauth/control/ssl/webauth.cert > /usr/share/fwguardian/webauth/control/ssl/certificate.pem
 
 ### Webserver directory
 WEB_DIR=$FW_DIR
