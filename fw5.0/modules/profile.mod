@@ -5,7 +5,7 @@
 # This software may be used and distributed according to the terms
 # of the GNU General Public License, incorporated herein by reference.
 #
-# profile module (control firewall profiles - new chains)
+# profile module (control firewall profiles - new chains) - rev1
 #
 
 if [ "$1" == "--help" ] || [ "$1" == "" ] ; then
@@ -75,8 +75,3 @@ cat $profiles | grep -v "^#\|^;" | grep "[[:alpha:]]" | igawk -v rload=$rload -v
     @include /usr/share/fwguardian/include/profile.inc \
   }' | sed "s/iptables/$sedipt/g" | tee -a $FW_DIR/../build/profile.def | $sh - 2>>$FW_DIR/../logs/profile.err
 
-### nat profiles
-if [ "$rload" == ".*" ] || [ "$rload" == "vpop3" ] || [ "$rload" == "rsquid" ]; then
-   [ -f /usr/share/fwguardian/vpop3.natrules ] && $sh /usr/share/fwguardian/vpop3.natrules 2>$FW_DIR/../logs/profile.err
-   [ -f /usr/share/fwguardian/rsquid.natrules ] && $sh /usr/share/fwguardian/rsquid.natrules 2>$FW_DIR/../logs/profile.err
-fi

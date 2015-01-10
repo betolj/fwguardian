@@ -156,8 +156,14 @@ case "$lnoption" in
       $iptables -F AllowAdmin 2>/dev/null
       updTrust ;;
     --reload-profile)
+      rsquid=0
+      rvpop3=0
       echo "Reloading... $2 profile !!!"
-      $FW_DIR/modules/profile.mod $FW_DIR/profile $2 >/dev/null 2>/dev/null ;;
+      $FW_DIR/modules/profile.mod $FW_DIR/profile $2 >/dev/null 2>/dev/null
+      [ "$2" == "vpop3" ] || [ "$2" == "profile" ] && rvpop3=1
+      [ "$2" == "rsquid" ] || [ "$2" == "profile" ] && rsquid=1
+      [ $rvpop3 -eq 1 ] && [ -f /usr/share/fwguardian/vpop3.natrules ] && $sh /usr/share/fwguardian/vpop3.natrules 2>$FW_DIR/logs/profile.err
+      [ $rsquid -eq 1 ] && [ -f /usr/share/fwguardian/rsquid.natrules ] && $sh /usr/share/fwguardian/rsquid.natrules 2>$FW_DIR/logs/profile.err ;;
     --reload-fwhosts)
       echo "Reloading... hosts profile !!!"
       updFwHosts ;;
