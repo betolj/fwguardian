@@ -5,7 +5,7 @@
 # This software may be used and distributed according to the terms
 # of the GNU General Public License, incorporated herein by reference.
 #
-# rtdgd module (DGD routing) - Dead Gateway routing Detection (failover)
+# rtdgd module (DGD routing) - Dead Gateway routing Detection (failover) - rev1
 #
 
 [ "$1" == "" ] && exit
@@ -138,7 +138,7 @@ do
               fi
               [ -f /proc/sys/net/ipv4/route/flush ] && echo 1 > /proc/sys/net/ipv4/route/flush || $ip route flush cache
               echo "$(date) Link DOWN... table: ${dgdlink[$i]} " >> /var/log/fwguardian/dgd.log
-              [ -x "$conntrack "] && conntrack -F conntrack 2>/dev/null >/dev/null
+              [ -x "$conntrack" ] && conntrack -F conntrack 2>/dev/null >/dev/null
            fi
            ctlost[$i]=0
         fi
