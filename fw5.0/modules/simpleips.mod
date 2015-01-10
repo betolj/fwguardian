@@ -55,6 +55,7 @@ $iptables -A CheckStrIPS -m string --algo bm --to 62 --string 'GET /w00tw00t.at.
 $iptables -A CheckStrIPS -m string --algo bm --to 49 --string 'POST' -m string --string 'netsparker@example.com' --algo kmp -j DropIPS
 $iptables -A CheckStrIPS -m string --algo kmp --string 'select' -m string --algo kmp --string 'substring' -j DropIPS
 $iptables -A CheckStrIPS -m string --algo kmp --string 'select' -m string --algo kmp --string '+from+' -j DropIPS
+$iptables -A CheckStrIPS -m string --algo kmp --string 'update users set name %3D' -j DropIPS
 $iptables -A CheckStrIPS -m string --algo kmp --string 'update' -m string --algo kmp --string '+set+' -j DropIPS
 $iptables -A CheckStrIPS -m string --algo bm --to 49 --string "POST " -j RETURN
 $iptables -A CheckStrIPS -m recent --name slowloris --set

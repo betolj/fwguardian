@@ -92,12 +92,6 @@ if [ -f /usr/share/fwguardian/cluster.prerules ] || [ -f /usr/share/fwguardian/c
 fi
 
 
-# Start Glusterfs daemon
-if [ -f /usr/share/fwguardian/cluster.glusterfs-server ] && [ ! -f /tmp/glusterfs.lock ]; then
-   echo "(re)Starting gluster at: `date`" 2>&1 >>$FW_DIR/logs/cluster.base.err
-   $CL_DIR/glusterfs/glusterfs-server restart 2>&1 >>$FW_DIR/logs/cluster.base.err
-fi
-
 # Start keepalived and conntrackd daemons
 if [ ! -f /tmp/clusterbase.lock ]; then
    # disable send icmp_redirects
@@ -134,6 +128,12 @@ if [ ! -f /tmp/clusterbase.lock ]; then
       sleep 3
       [ -f /proc/sys/net/ipv4/route/flush ] && echo 1 > /proc/sys/net/ipv4/route/flush || $ip route flush cache
    fi
+fi
+
+# Start Glusterfs daemon
+if [ -f /usr/share/fwguardian/cluster.glusterfs-server ] && [ ! -f /tmp/glusterfs.lock ]; then
+   echo "(re)Starting gluster at: `date`" 2>&1 >>$FW_DIR/logs/cluster.base.err
+   $CL_DIR/glusterfs/glusterfs-server restart 2>&1 >>$FW_DIR/logs/cluster.base.err
 fi
 
 touch /tmp/clusterbase.lock

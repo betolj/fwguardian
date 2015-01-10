@@ -42,6 +42,8 @@ if [ ! "$(pidof keepalived)" ] || [ "$cmd" == "restart" ]; then
    ls /sys/class/net | awk '/^vrrp\./ { print " ip link del "$1; }' | $sh - 2>/dev/null >/dev/null
 
    # - Restart daemon
+   rm -f /var/tmp/cluster.vip.* 2>/dev/null
+
    $keepalived -f /etc/keepalived/keepalived.conf -p /var/run/keepalived.pid -P
    touch /var/lock/keepalived.lock
 fi

@@ -16,6 +16,7 @@ FW_DIR=$1
 ip=$(which ip)
 iptables=$(which iptables)
 arptables=$(which arptables)
+conntrack=$(which conntrack)
 sedipt=$(echo $iptables | sed "s/\//\\\\\//g")
 
 if [ -f /var/run/dgdguardian ]; then
@@ -137,7 +138,7 @@ do
               fi
               [ -f /proc/sys/net/ipv4/route/flush ] && echo 1 > /proc/sys/net/ipv4/route/flush || $ip route flush cache
               echo "$(date) Link DOWN... table: ${dgdlink[$i]} " >> /var/log/fwguardian/dgd.log
-              conntrack -F conntrack 2>/dev/null >/dev/null
+              [ -x "$conntrack "] && conntrack -F conntrack 2>/dev/null >/dev/null
            fi
            ctlost[$i]=0
         fi

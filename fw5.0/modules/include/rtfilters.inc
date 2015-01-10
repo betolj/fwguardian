@@ -310,7 +310,7 @@
 
         ### Making log rules
         if (match($0,"[ |\t](log-desc|log)=")) {
-           split($0,logg,"[ |\t]log-desc=|[ |\t]log="); split(logg[2],logg,"\"");
+           split($0,logg,"[ |\t]log-desc=|[ |\t]log="); split(logg[2],logg,"\""); gsub("\\s+$", "", logg[2]);
            if ( usegp == 0 ) print "iptables -A"chRule,rtint,OD"-m conntrack --ctstate NEW -j LOG --log-level info --log-prefix \"[ "logg[2]" ]: \"";
            else print "iptables -A AuthGP"gp,rtint,OD"-m conntrack --ctstate NEW -j LOG --log-level info --log-prefix \"[ "logg[2]" ]: \"";
         }
