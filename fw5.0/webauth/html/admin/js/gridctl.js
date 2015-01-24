@@ -754,6 +754,7 @@ function addRow(gridid, rulesGrid, newRow, medited, chtype, opt1, edalias) {
 function delRow(gridid, rulesGrid, newRow, medited, msg) {
    var selid = gridid.jqGrid('getGridParam','selrow');
    var rules = rulesGrid.length;
+   var doreload = 0;
 
    if (selid) {
       if (newRow.length > 0) {
@@ -767,7 +768,8 @@ function delRow(gridid, rulesGrid, newRow, medited, msg) {
       var gridrules = gridid.jqGrid('getDataIDs').length;
 
       // Group grids
-      if (rulesGrid[auxid]['Group']) var auxpol = rulesGrid[auxid]['Group'];
+      var auxpol;
+      if (rulesGrid[auxid]['Group']) auxpol = rulesGrid[auxid]['Group'];
 
       // Delete in main data grid
       for (var i=auxid; i<rules; i++) {
@@ -785,13 +787,14 @@ function delRow(gridid, rulesGrid, newRow, medited, msg) {
       }
 
       // remove row in rulesGrid and reload Grid
+      selidFind=selid;
       rulesGrid.pop();
       gridid.jqGrid('clearGridData');
-      if (rules == gridrules) {
+      if (rulesGrid[selid-1]['Group'] && rulesGrid[selid-1]['Group'] !== auxpol) doreload++;
+      if (rules == gridrules || doreload) {
          refreshGroup(gridid, rulesGrid, rules-1, selid);
          setPos(gridid, selid, getGroups(rulesGrid[selid-1], gridGroups));
       }
-      else selidFind=selid;
    }
    else alert(msg);
    return rulesGrid;
