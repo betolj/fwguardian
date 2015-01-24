@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # "POST /admin/chprofile.cgi" -> "save" button
 sub chprofile {
@@ -385,6 +385,7 @@ foreach (@fwprof,@fwltprof) {
       my $auxdesc = $_;
       if ($_ !~ /chk=disabled$/) {
          $auxdesc =~ s/.*://;
+         $auxdesc =~ s/chk=.*//;
          my $line = "$auxdesc:$auxdesc";
          $msg[0] = "$msg[0];$line";
       }
@@ -747,7 +748,12 @@ javascript
 $msg[0] = "Por favor... selecione a linha a ser removida!";
 $msg[1] = "Please... Select the line to delete!";
 print FILE << "javascript";
-           var selid = 0;
+           var selid = jQuery("#ifProfGrid").jqGrid('getGridParam','selrow');
+           if (selid > 0) {
+              var clret = jQuery("#ifProfGrid").jqGrid('getRowData', selid);
+              var defGroup = clret['Group'].replace(/\\?chk=.*/, "");
+           }
+
            rulesCt = 1;
            rulesGrid = delRow(jQuery("#ifProfGrid"), rulesGrid, newRow, "$medited[$FW_LANG]", "$msg[$FW_LANG]");
            newRow = updnewRow();
@@ -763,10 +769,14 @@ print FILE << "javascript";
            allPolicies=updGrp();
            for (var i=2; i<selgroup.length && allPolicies.length > 0; i++) {
               find=0;
-              for (j=0;j<allPolicies.length && find==0; j++) if (selgroup.options[i].value === allPolicies[j] && rulesGrid.length > 0) find=1;
-              if (find == 0) {
-                 selgroup.remove(i);
-                 saveall=1;
+              var chkgroup = selgroup.options[i].value;
+              chkgroup=chkgroup.replace(/\\?chk=.*| chk=.*/, "");
+              if (chkgroup===defGroup) {
+                 for (j=0;j<allPolicies.length && find==0; j++) if (chkgroup === allPolicies[j] && rulesGrid.length > 0) find=1;
+                 if (find == 0) {
+                    selgroup.remove(i);
+                    saveall=1;
+                 }
                  break;
               }
            }

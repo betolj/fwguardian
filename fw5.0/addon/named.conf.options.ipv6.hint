@@ -18,6 +18,7 @@ options {
 	// Uncomment the following block, and insert the addresses replacing 
 	// the all-0's placeholder.
 
+	clients-per-query 0;
         resolver-query-timeout 5;
         deny-answer-addresses { 127.0.0.0/8; 10.0.0.0/8; 172.16.0.0/12; 192.168.0.0/16; fe80::/10; fc00::/7; } except-from { "local-zone"; };
         deny-answer-aliases { "local-zone"; };

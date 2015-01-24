@@ -18,6 +18,7 @@ options {
 	// Uncomment the following block, and insert the addresses replacing 
 	// the all-0's placeholder.
 
+	clients-per-query 0;
         preferred-glue A;
         fetch-glue yes;
         //filter-aaaa-on-v4 yes;
