@@ -1,0 +1,8 @@
+acl domain_socialnetwork dstdom_regex \.(facebook|fbcdn|orkut|twitter|badoo|linkedin|myspace|hi5|tagged|pinterest|twoo|tumblr)\.(net|com|com\.br)
+acl domain_socialnetwork dstdom_regex (plus|plusone)\.google\.(com|com\.br) (twitter|instagram|facebridge|orkuti)\.(net|com|com\.br)
+acl clientaddr_socialnetwork src "/etc/squid/acl/plugin/clientaddr_socialnetwork"
+
+http_access deny domain_socialnetwork !clientaddr_socialnetwork
+
+adaptation_access qlproxy1 deny domain_socialnetwork
+adaptation_access qlproxy2 deny domain_socialnetwork

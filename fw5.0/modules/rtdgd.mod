@@ -132,6 +132,8 @@ do
                  $ip rule del prio 11 table ${dgdlink[1]} 2>/dev/null
                  $ip rule del prio 11 table ${dgdlink[2]} 2>/dev/null
                  $ip rule add prio 11 table $lb2tb
+
+                 [ -f /tmp/tb-$lb2tb.down ] && rm -f /tmp/tb-$lb2tb.down 2>/dev/null
               else
                  $arptables -A rtdgd -s ${tbgw[$i]} -j DROP 2>/dev/null
                  $ip ne del ${tbgw[$i]} dev ${tbif[$i]} 2>/dev/null

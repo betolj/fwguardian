@@ -1,0 +1,12 @@
+acl url_videos url_regex (video|videos|tvuol|globotv|terratv|player).*\.(google|uol|yahoo|msn|globo|r7|terra|glbimg)\.(com|com\.br)
+acl url_videos url_regex \.(trrsf|terra|uol)\.(com|com\.br)\/(broadcast|event\.ng\/|terratv|.*\/_js\/livecontent)
+acl dom_videos dstdom_regex (\.|^)(livestream|sambatech|soundcloud|octoshape|longtailvideo|liquidplatform|playwire|vimeo|netflix)\.(net|com|com\.br)
+acl clientaddr_videos src "/etc/squid/acl/plugin/clientaddr_multimedia"
+
+http_access deny dom_videos !clientaddr_videos
+http_access deny url_videos !clientaddr_videos
+
+adaptation_access qlproxy1 deny dom_videos
+adaptation_access qlproxy2 deny dom_videos
+adaptation_access qlproxy1 deny url_videos
+adaptation_access qlproxy2 deny url_videos

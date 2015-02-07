@@ -1,0 +1,173 @@
+# Domain whitelist
+
+\.projetosigo\.com\.br
+(^|\.)(quintolabs|dansguardian|urlblacklist)\.(com|org)
+\.(gov|jus|edu|med|mil|leg|cnpq|inpe|bvs|fiocruz|embrapa)\.br
+
+# Mail
+(a|g)fx[0-9]\.hotmail\.com
+
+# Health
+\.cardiol\.br
+\.bvsalud\.org
+\.islonline\.net
+\.ncbi\.nlm\.nih\.gov
+\.(saofrancisco|saofranciscosaude|servan)\.com\.br
+\.(abbott|rwpoll|rxlist|thomsonhc|uptodate|instrumentinformatics|accp|medscape)\.com
+\.(unimedcg|hcor|bensaude|cassems|hospitalsiriolibanes|biossegurancalaboratorial|canalminassaude|universidademinassaude)\.com\.br
+\.(ipedapae|sbhh|amb|sbn|soben|telessaudebrasil|medicinadoesporte|socesp|redecancer|unisaudems)\.org\.br
+\.(sbp|cardios|merial|medgoldman|rimed|anmp|arritmiaonline|sobrati|celuladiagnosticos|resultados|baxter|aattendance|probio)\.com\.br
+chemm\.nlm\.nih\.gov
+
+# Blogs
+\.redebrasileirademea\.ning\.com
+\.(prontomed|boaspraticasfarmaceuticas|atencaoprimariaemsaude|amac7)\.blogspot\.com
+
+# Iagro
+\.altissimomedvet\.blogspot\.com
+\.sanidaderural\.blogspot\.com
+\.panaftosa\.org\.br
+(api|static|inovadefesa|repileite)\.ning\.com
+\.(hanainnosys|aviculturaindustrial|suinoculturaindustrial)\.com\.br
+\.anitrace\.com\.br
+\.cfmv\.com\.br
+\.potafos\.org
+\.cfsph\.iastate\.edu
+\.chaparecomecar\.com\.br
+\.fonsecaweb\.com
+
+# Syndicates
+\.(assomasul|sintssms|crams|rbaonline)\.org\.br
+\.(sppdms|cenofisco|sindafaz|sindifisco|diariomunicipal)\.com\.br
+\.(creams|cfc|crcms|sifems|sindate|crmvms|sinait|fiscosul|acspmbmms|sindifisca|sindireceita|sindifisco-ms|oabms|fenacon|fetems)\.org\.br
+
+# Legal sites
+\.jusvi\.com
+\.liber\.adv\.br
+\.(jus|jurisite|juristas|centraljuridica|direitopublico|jusnavigandi)\.com\.br
+
+# Bank links
+\.(bancobrasil|bancodobrasil|bb|bbseguroauto)\.com\.br
+\.(santander|santandernet|santanderfinanciamentos)\.com\.br
+\.(bancoreal|realsecureweb)\.com\.br
+\.(bradesco|bradescocartoes)\.com\.br
+\.(sicredi|sicreditotal|banespa|goodcard)\.com\.br
+\.hsbc\.com\.br
+\.caixa\.com\.br
+\.(itau|itaucard)\.com\.br
+fiesdacaixa\.com\.br
+\.(spc|venape)\.org\.br
+\.scpc\.inf\.br
+\.(serasa|scpccg|spccg)\.com\.br
+\.serasa(experian|consumidor)\.com\.br
+\.(ticket|e-ticket|tauruscard|tauruspetroleo)\.com\.br
+(sodexosaldocartao|sodexo|sodexho|sodexomotivation|meunovosodexo|cartoesbeneficio|alelo)\.(com|com\.br)
+
+#Microsoft
+#.windowsupdate.com
+#windowsupdate.microsoft.com
+#update.microsoft.com
+#wustat.windows.com
+#ntservicepack.microsoft.com
+#download.microsoft.com
+#download.windowsupdate.com
+\.microsoft\.com
+www\.msftncsi\.com
+\.officeapps\.live\.com
+(mscrl|crl|office15client)\.microsoft\.com
+
+# Public companies
+201\.41\.82\.130
+\.aguasguariroba\.com\.br
+\.enersul\.com\.br
+\.gruporede\.com\.br
+\.redenergia\.com
+\.ect\.com\.br
+\.correios\.com\.br
+\.correioweb\.com\.br
+\.(portalfiscal|diariooficial)\.inf\.br
+\.(encat|abnt)\.(org|org.br)
+
+# Telephony
+\.brasiltelecom\.com\.br
+\.oi\.com\.br
+\.oiloja\.com\.br
+\.novaoi\.com\.br
+\.brturbo\.com\.br
+\.embratel\.com\.br
+\.telefonica\.com\.br
+\.telefonica\.net\.br
+\.telemar\.com\.br
+\.claro\.com\.br
+\.claroideias\.com\.br
+\.tim\.com\.br
+\.vivo\.com\.br
+\.telelistas\.net
+\.guiamais\.com\.br
+\.102busca\.com\.br
+\.netcombo\.com\.br
+
+# University
+propp\.ledes\.net
+\.fapec\.org
+\.anhanguera\.com
+\.uniderp\.br
+\.lfg\.eduead\.com\.br
+\.(cesgranrio|ev|fcr|fadems|fapems|funrio|funrioconcursos|escolavirtual)\.org\.br
+\.(unitins|unigranet|anhangueravirtual|portaleducacao|accesstage|qualittas|didatus|lfg|unoparvirtual)\.com\.br
+\.(fgv|usp|uem|uel|unb|ufla|ufrj|ufms|uems|ucdb|ufpr|ufsc|ufrgs|ufscar|unesp|unaes|unip|univali|estacio|pucsp|unigran|uniderp|vestibulares)\.br
+
+# Government
+\.fiems\.com\.br
+pga4\.cna\.org\.br
+pmcg\.corpnet\.com\.br
+\.(caged|bandeirantesms|prefeituradecampogrande|issdigitalcmg)\.com\.br
+
+# Google tools
+\.gateway\.sigo
+\.googleapis\.com
+csi\.gstatic\.com
+themes\.googleusercontent\.com
+(clients0|clients1|clients2|clients3|clients4)\.(google|googleusercontent)\.com
+
+# Google maps
+mts[0-9]\.google\.com
+(khms0|khms1)\.google\.com
+\.maps\.(googleapis|google|gstatic)\.com
+tools\.google\.com
+ssl\.gstatic\.com
+google-maps-utility-library-v3\.googlecode\.com
+
+# PKI
+(pki|calendar)\.google\.com
+(crl|pki|ocsp)\.(geo|user)trust\.com
+\.(certisign|outralcr)\.com\.br
+
+# Others
+\.oie\.int
+pcchips\.com\.tw
+reclameaqui\.com\.br
+\.wikipedia\.org
+\.(arquivoteca|sescms|embratec)\.com\.br
+\.(udv|cfmv|cras|coresul|fipe|fonseas)\.org\.br
+\.(senac|printer-drivers)\.br
+\.(emc|soyousa|creative|verisign|avast|avertlabs|oracle|webtrends|kaspersky|kaspersky-labs|kasperskyamericas|n-billing|dzone)\.com
+\.(webdanfe|consultaremedios)\.com\.br
+(^|\.)(azi|verisign|digithobrasil)\.(net|com|com\.br)
+\.(orgfree|dicionariodoaurelio|netserv21)\.com
+\.(maplink2|itelinformatica|psgtecnologiaaplicada|consist)\.com\.br
+\.(hp|ibm|dell|3com|sun|cisco|epson|toshiba|semptoshiba|asus|intel|compaq|sony|maxtor|samsung|borland)\.(com|com\.br)
+ppa\.launchpad\.net
+\.(tln|cbss|cvims|assetur|sebrae|senac|tempoagora|combatadengue)\.com\.br
+www\.(nfp|dicio|fipe|cassi|festivalamericadosul|temporecorde|expressoitamarati)\.com\.br
+\.solanalise\.com\.br
+plugins\.qgis\.org
+itext-general\.2136553\.n4\.nabble\.com
+postgresql\.1045698\.n5\.nabble\.com
+portalatualizacao\.mv\.com\.br
+www\.draftsight\.com
+\.qualitysistemas\.com\.br
+\.ibsolution\.com\.br
+187\.6\.254\.27
+acesso.\ws
+\.academia\.edu

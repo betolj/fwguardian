@@ -1,0 +1,3 @@
+# Disable IPv6 dst address
+#acl to_ipv6 dst ipv6
+#http_access deny to_ipv6

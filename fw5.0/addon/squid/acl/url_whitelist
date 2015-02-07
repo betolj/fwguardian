@@ -1,0 +1,84 @@
+# URL whitelist (regex)
+
+# Google/APIs
+api\.ipinfodb\.com
+(ajax|translate)\.(google|googleapis)\.com
+\.google-analytics\.com
+\.google\.com/custom\?q=.*&domains=http://www\.ms\.gov\.br&sa=Busca
+\.google\.com/custom\?hl=.*&btnG=Pesquisar&sitesearch=http://www\.ms\.gov\.br
+\.google\.(com|com.[a-z]+)\/(cse\/|afsonline\/|search\?.*(&q|q)=)
+\.(googlesyndication|googleadservices)\.com\/.*(imgad\?id=|\.js)
+\.(terra|trrsf|r7|uol|globo|addthis|adroll|serving-sys)\.(com|com\.br)\/.*\.(js|css)($|\?)
+\.doubleclick\.net/.*\.(terra|uol|globo)\.
+\.terra\.com\.br\/globalSTATIC\/.*\/(advert|admanager)
+\.(facebook|fbcdn|cloudfront|blogger|linkedin|addthis)\.(net|com|com\.br)\/.*\.(js|jpg|gif|bmp|png)$
+^(http|https):\/\/ads\.(globo|img\.globo|imguol)\.com\/.*\.(jpg|gif|bmp|png)$
+^(http|https):\/\/www\.facebook\.com\/(v[0-9]\.[0-9]\/plugins|plugins)\/(like|likebox|like_box|share_button)\.php
+^(http|https):\/\/twitter\.com\/.*\.js($|\?)
+^(http|https):\/\/platform\.twitter\.com\/.*\.(js|css)($|\?)
+^(http|https):\/\/gdata\.youtube\.com\/feeds\/api\/
+\.app[0-9]+.*\.logmein\.com
+\.ubuntu\.com\/ubuntu\/(dist|pool)
+dl\.google\.com\/linux\/chrome\/deb\/
+ppa\.launchpad\.net\/webupd8team\/java\/ubuntu
+
+# Government
+pmcg\.corpnet\.com\.br
+
+# Syndicate
+portal\.cnm\.org\.br
+\.fenafisco\.org\.br
+www\.cocresul\.coop\.br
+webmail\.sicoobprimavera\.coop\.br
+201\.2\.106\.69
+201\.33\.22\.217
+
+# University
+200\.129\.209\.(47|90)
+
+# Health
+189\.10\.93\.26
+189\.28\.128\.37
+186\.215\.87\.98
+sbhci\.org\.br
+mocbrasil\.com
+www\.ncbi\.nlm\.nih\.gov
+www\.(prvademecum|free-ocr)\.com
+www\.(cure4kids|sobrac|stabilis)\.org
+www\.(aschr|abhh|abhheventos)\.com\.br
+www\.dixtal\.com\.br
+www\.alimentosonline\.com\.br
+
+# Others
+europa\.eu
+www\.bn\.br
+www\.priberam\.pt
+fundect\.ledes\.net
+www\.meuip\.com\.br
+meuip\.datahouse\.com\.br
+maven\.apache\.org
+repo\.maven\.apache\.org
+michaelis\.uol\.com\.br
+tira-teima\.as\.uol\.com\.br
+www\.voltadasnacoes\.ms\.sesi\.org\.br
+189\.73\.199\.55
+189\.74\.131\.100
+200\.19\.215\.13
+200\.199\.222\.52
+164\.41\.222\.133
+age\.gssbr\.com\.br
+200\.250\.55\.174
+50\.7\.67\.235
+201\.14\.69\.204
+#go\.microsoft\.com
+#runonce\.msn\.com
+
+www\.xvconafisco\.org\.br
+200\.203\.239\.165
+mec\.ctis\.com\.br
+serasaexperianportais\.com\.br
+new\.paho\.org
+azi\.srv\.br
+eventos\.fundepag\.br
+www\.(tln|cbss|cvims|assetur|tempoagora|combatadengue)\.com\.br
+

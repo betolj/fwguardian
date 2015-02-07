@@ -1,0 +1,12 @@
+# Permissive ACL
+acl url_remoteadm url_regex /(din|dout)\.aspx
+acl domain_remoteadm dstdomain .logmein.com .logmeinrescue.com .teamviewer.com .dyngate.com
+acl clientaddr_remoteadm proxy_auth -i "/etc/squid/acl/plugin/clientaddr_remoteadm"
+
+http_access allow clientaddr_remoteadm ssl_ip
+http_access allow url_remoteadm clientaddr_remoteadm
+http_access allow domain_remoteadm clientaddr_remoteadm
+
+adaptation_access qlproxy1 deny url_remoteadm
+adaptation_access qlproxy1 deny domain_remoteadm
+adaptation_access qlproxy2 deny domain_remoteadm

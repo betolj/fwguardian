@@ -1,0 +1,17 @@
+### Negotiate kerberos/NTLM module
+auth_param negotiate program /usr/lib/squid/negotiate_wrapper_auth --ntlm /usr/bin/ntlm_auth --helper-protocol=gss-spnego --use-cached-creds --kerberos /usr/lib/squid/negotiate_kerberos_auth -s GSS_C_NO_NAME
+auth_param negotiate children 200 startup=20 idle=40
+auth_param negotiate keep_alive off
+
+### NTLM Auth
+auth_param ntlm program /usr/bin/ntlm_auth --use-cached-creds --helper-protocol=squid-2.5-ntlmssp
+auth_param ntlm children 100 startup=20 idle=40
+auth_param ntlm keep_alive off
+
+### Basic NTLM plugin Auth
+auth_param basic program /usr/bin/ntlm_auth --use-cached-creds --helper-protocol=squid-2.5-basic
+auth_param basic children 50 startup=10 idle=20
+auth_param basic credentialsttl 2 hours
+auth_param basic casesensitive off
+
+auth_param basic realm Squid Proxy

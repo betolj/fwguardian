@@ -1,0 +1,2 @@
+if $programname == 'qlproxy' then /var/log/qlproxy/access.log
+& ~

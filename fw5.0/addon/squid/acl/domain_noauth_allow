@@ -1,0 +1,12 @@
+# Disable auth checks (except to greylist)
+
+.avg.com
+.icloud.com
+.windowsupdate.com
+.shopcar.com.br
+.infoimoveis.com.br
+.npmjs.org
+.herokuapp.com
+.netbeans.org
+glovis.usgs.gov
+github.com

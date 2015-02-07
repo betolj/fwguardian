@@ -1,0 +1,13 @@
+# URL blacklist (regex)
+
+groove\.microsoft\.com
+ipv6\.msftncsi\.com
+www\.coroata\.ma\.gov\.br\/chat
+www\.unisaudems\.org\.br\/Musicas
+www\.andira\.pr\.gov\.br\/v2\/batepapo
+www\.aparecidadotaboado\.ms\.gov\.br\/batepapo
+www\.(nazarepaulista|cidadaopg|uchoa)\.sp\.gov\.br\/chat
+ia\.nspmotion\.com\/(delivery|tracking)
+nds1\.nokia\.com\/files\/support\/global
+video\.msn\.com\/services\/user\/
+208\.43\.73\.138

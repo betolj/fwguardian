@@ -1,0 +1,8 @@
+# Permissive ACL
+acl domain_vdrive dstdomain .dropbox.com drive.google.com skydrive.live.com .storage.live.com .storage.msn.com onedrive.live.com .directory.live.com .livefilestore.com
+acl clientaddr_vdrive src "/etc/squid/acl/plugin/clientaddr_vdrive"
+
+http_access allow domain_vdrive clientaddr_vdrive
+
+adaptation_access qlproxy1 deny domain_vdrive
+adaptation_access qlproxy2 deny domain_vdrive

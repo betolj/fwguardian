@@ -1,0 +1,52 @@
+# Domain whitelist - Only for networks and networks_greylist
+
+\.me\.com
+\.ibest\.com\.br
+\.glbimg\.com
+globo\.demdex\.net
+\.downloadcertisign\.com\.br
+\.promocaotamviagens\.com\.br
+\.gizmodo\.com\.br
+\.(midiamax|campograndenews|estadao|infomoney)\.com\.br
+my.\opera\.com
+\.slashdot\.org
+noticias\.br\.msn\.com
+
+# Google
+pagead2.googlesyndication.com
+(googleads|pubads)\.[a-z]\.doubleclick\.net
+
+# Shopping sites
+\.morenamaluca\.com\.br
+\.(mercadolivre|mercadolibre|buscape|ebay)\.(com|com\.br)
+
+# Professional content
+\.(pciconcursos|neonconcursos|euvoupassar|concursosnobrasil|catho|folhadirigida|lfg)\.com\.br
+
+# Education
+\.ufrn\.br
+\.direitomemoria\.org\.br
+academia\.edu
+educacao\.uol\.com\.br
+www\.cambridgeenglish\.org
+mec\.cube\.call\.inf\.br
+forumeadprofissional\.ning\.com
+
+# Health
+\.medicinanet\.com\.br
+equipamentosmedi\.web114\.f1\.k8\.com\.br
+
+# Others
+\.diigo\.com
+\.sxc\.hu
+superlogica\.com
+store\.free-college\.org
+www\.gamespot\.com
+disque100\.call\.inf\.br
+\.virtualbox\.org
+\.resol\.com\.br
+\.portalafricas\.com\.br
+\.uniclasshotel\.com\.br
+\.aguasdopantanalhotel\.com\.br
+\.hotelrecantodospassaros\.com\.br
+

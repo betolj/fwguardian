@@ -1,0 +1,13 @@
+acl domain_download dstdom_regex "/etc/squid/acl/plugin/domain_bigdownload"
+acl clientaddr_download src "/etc/squid/acl/plugin/clientaddr_bigdownload"
+acl clientaddr_download src "/etc/squid/acl/clientaddr_bigdownload"
+
+reply_body_max_size none serverlist
+reply_body_max_size none domain_download
+reply_body_max_size none domain_whitelist
+reply_body_max_size none clientaddr_download
+reply_body_max_size none clientaddr_whitelist
+reply_body_max_size none domain_mime_multimedia
+reply_body_max_size none clientaddr_mime_multimedia dom_videos
+reply_body_max_size none clientaddr_mime_multimedia rep_mime_multimedia
+reply_body_max_size 200 MB all

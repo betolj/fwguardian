@@ -59,16 +59,24 @@ $iptables -A CheckStrIPS -m string --algo kmp --string 'update users set name %3
 $iptables -A CheckStrIPS -m string --algo kmp --string 'update' -m string --algo kmp --string '+set+' -j DropIPS
 $iptables -A CheckStrIPS -m string --algo bm --to 49 --string "POST " -j RETURN
 $iptables -A CheckStrIPS -m recent --name slowloris --set
-cat $FW_DIR/securityaddon/config | gawk -v ipt=$iptables '{ \
+cat $FW_DIR/securityaddon/greylist $FW_DIR/securityaddon/config | gawk -v ipt=$iptables '{ \
    if ($1 == "user-agent") { \
       if (match($0, "nospace")) print ipt" -A CheckStrIPS -m string --algo kmp --to 700 --string \"User-Agent\" -m string --algo kmp --to 740 --string \""$2"\" -j DropIPS"; \
       else print ipt" -A CheckStrIPS -m string --algo kmp --to 700 --string \"User-Agent\" -m string --algo kmp --to 740 --string \" "$2"\" -j DropIPS"; \
    } \
-   else if ($1 == "check-ports" && $3 == "simpleips") {
+   else if ($1 == "check-ports" && $3 == "simpleips") { \
       print ipt" -A INPUT -m multiport -p tcp --dport "$2" -j CheckIPS"; \
       print ipt" -A OUTPUT -m multiport -p tcp --sport "$2" --tcp-flags PSH,SYN,ACK SYN,ACK -m recent --name checkips --update"; \
       print ipt" -A FORWARD -m multiport -p tcp --dport "$2" -j CheckIPS"; \
       print ipt" -A FORWARD -m multiport -p tcp --sport "$2" --tcp-flags PSH,SYN,ACK SYN,ACK -m recent --name checkips --update"; \
-   }
+   } \
+   else if ($1 == "src-ip" || $1 == "dst-ip") { \
+      if ($3 == "simpleips" || !$3) { \
+        countips++; \
+        if ($1 == "src-ip") ipaddr=" -s "$2; \
+        else ipaddr=" -d "$2; \
+        print ipt" -I CheckIPS "countips,ipaddr" -j RETURN"; \
+      } \
+   } \
 }' | $sh - 2>>$FW_DIR/logs/simpleips.err 
 

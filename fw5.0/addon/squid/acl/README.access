@@ -1,0 +1,33 @@
+# Access sequence
+
+1. Mandatory blacklist
+clientaddr_blacklist - Deny all to the source ipaddr
+arp_blacklist        - Deny all to the source arp
+
+2. Mandatory whitelist (ipaddr)
+clientaddr_whitelist - Allow all to the source ipaddr (reply too)
+serverlist           - Allow all to the destination server ipaddr (reply too)
+
+3. Denied URLs
+url_blacklist        - Deny URLs
+
+4. Allowed access
+domain_whitelist     - Allow domain list (reply too)
+url_whitelist        - Allow url list (reply too)
+* "Allow all from localhost"
+
+5. Denied access
+domain_blacklist     - Deny domain list
+networks_blacklist   - Deny source ipaddr except serverlist (item 2)
+arp_graylist         - Deny source arp except serverlist (item 2)
+* "Deny all to localhost"
+
+6. Plugin ACLs defs
+
+7. Pass to icap control
+   7.1 Include_firstaux defs (user ACL) - Allow if no deny policy match
+   7.2 networks_graylist                - Allow if no deny policy match
+   7.3 networks                         - Allow if no deny policy match
+   7.4 Include_lastaux defs (user ACL)  - Allow if no deny policy match
+
+8. Deny all

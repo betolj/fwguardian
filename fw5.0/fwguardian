@@ -521,14 +521,10 @@ dosprotect() {
           $iptables -N Do_SYNPROXY
           [ -f $FW_DIR/securityaddon/greylist ] && grep "^[\s]*\(src\|dst\)-ip\b" $FW_DIR/securityaddon/greylist | awk -v ipt=$iptables '{ \
              if ($3 == "synproxy" || !$3 ) { \
-                if ($1 == "src-ip") { \
-                   print ipt" -t raw -A NoTRACK_SYNP -s "$2" -j RETURN"; \
-                   print ipt" -A Do_SYNPROXY -s "$2" -j RETURN"; \
-                } \
-                else { \
-                   print ipt" -t raw -A NoTRACK_SYNP -d "$2" -j RETURN"; \
-                   print ipt" -A Do_SYNPROXY -d "$2" -j RETURN"; \
-                } \
+                if ($1 == "src-ip") ipaddr=" -s "$2; \
+                else ipaddr=" -d "$2; \
+                print ipt" -t raw -A NoTRACK_SYNP "ipaddr" -j RETURN"; \
+                print ipt" -A Do_SYNPROXY "ipaddr" -j RETURN"; \
              } \
           }' | $sh -
           $iptables -t raw -A NoTRACK_SYNP -j CT --notrack

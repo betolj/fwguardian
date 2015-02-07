@@ -1,0 +1,21 @@
+# Domain greylist - Only for networks and networks_greylist
+# Ignore ICAP search only for domain *requests* (remain content filter): its a blacklist bypass
+
+g1\.globo\.com
+\.skoob\.com\.br
+translate\.google\.com\.br
+groups\.(yahoo|msn)\.com
+\.(scribd|cartaexpressa|hypescience)\.com
+\.(blog|blogspot|blogger|blogblog|wordpress|abril|issuu)\.(br|com|com\.br)
+
+# Amazonaws
+\.amazonaws\.com
+www\.livepass\.com\.br
+
+# Others
+\.savassihotel\.com\.br
+sgpiu\.com\.br
+updates\.fmaudit\.com
+fmaudit\.ibsolution\.com\.br
+\.gttechonline\.com
+\.clubedohardware\.com\.br

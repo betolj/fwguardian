@@ -1,0 +1,33 @@
+## Add any of your own refresh_pattern entries above these.
+# 10080 - 1 week
+# 20160 - 2 week
+# 518400 - 1 year
+refresh_pattern ^ftp:           1440    40%     10080
+refresh_pattern ^gopher:        1440    0%      1440
+
+refresh_pattern -i \(www|apis)\.google\.com/(cbk|afsonline)            1440  80% 20160  ignore-no-store override-expire ignore-reload reload-into-ims
+refresh_pattern -i \.(googleapis|googlesyndication|google).com/.*\.js  1440  80% 10080  ignore-no-store override-expire ignore-reload
+refresh_pattern -i \.(google|facebook|twitter)\.com/.*(\.js$|/jsapi/)  1440  80% 10080  ignore-no-store override-expire ignore-reload
+refresh_pattern -i \.(doubleclick\.net|googlesyndication\.com/pagead)  1440  80% 10080  ignore-no-store override-expire
+
+refresh_pattern -i microsoft.com/.*\.(cab|exe|dll|psf|ms[i|u|f]|asf|wm[v|a]|dat|zip)      10080 90% 43200 ignore-no-store reload-into-ims override-expire
+refresh_pattern -i windowsupdate.com/.*\.(cab|exe|dll|psf|ms[i|u|f]|asf|wm[v|a]|dat|zip)  10080 90% 43200 ignore-no-store reload-into-ims override-expire
+
+refresh_pattern -i \.(avi|mp4|mpeg|swf|flv|x-flv|mp3|wav|kmz|pdf)$     43200 90% 518400 override-expire override-lastmod ignore-reload reload-into-ims ignore-no-store ignore-private
+refresh_pattern -i \.(facebook|youtube|orkut|twitter|badoo.*)\.com 10080 80% 30240  override-expire override-lastmod ignore-reload reload-into-ims ignore-no-store ignore-private
+refresh_pattern -i \.(fbcdn\.net|ytimg\.com|google\.com/flatfile)  1440  60% 30240  ignore-no-store ignore-private ignore-reload reload-into-ims
+
+refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
+refresh_pattern -i \.(bol|r7|globo|imguol|glbimg|trrsf|s-msn)\.com 1440  80% 10080  ignore-no-store ignore-reload reload-into-ims
+
+refresh_pattern -i \.(gov|jus)\.br      0       80% 1440
+refresh_pattern -i \.index.(html|htm)$  0       40% 10080
+refresh_pattern -i \.(html|htm|css|js)$ 1440    40% 40320
+
+refresh_pattern -i \.(americanas|submarino|extra|magazineluiza|mercadolivre|ebay|walmart|netshoes|carrefour)\.com 1440  80% 10080  ignore-no-store override-expire
+
+refresh_pattern -i \.(gif|png|jpg|jpeg|ico|bmp)$                   10080 70% 43200  ignore-no-store override-expire refresh-ims
+refresh_pattern -i \.(exe|zip|cab|rar|iso|7vy)$                    10080 50% 518400 ignore-no-store override-expire refresh-ims
+
+refresh_pattern .               0       20%     4320
+

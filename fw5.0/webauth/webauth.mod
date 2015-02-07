@@ -1301,9 +1301,9 @@ sub chkperm {
           else {
              $res = dismodule($url, $peer);
           }
-      } elsif ($url eq "/admin/tfshow.cgi" || $url eq "/admin/tfshow.cgi?shell") {
+      } elsif ($url =~ /\/admin\/tfshow\.(cgi|cgi?(default|shell)$)/) {
           if (`$FW_DIR/modules/tools/tfshow/tfshow -j -t` eq "Ok") {
-             if ($url eq "/admin/tfshow.cgi") {
+             if ($url eq "/admin/tfshow.cgi" || $url eq "/admin/tfshow.cgi?default") {
                 $res = get_tfshow("default");
              }
              else {

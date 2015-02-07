@@ -1,0 +1,5 @@
+acl url_ytembedded url_regex \.youtube\.com\/(videoplayback|get_video_info|stream_204|s|crossdomain.xml|v\/.*|embed\/.*)(\?|$)
+acl clientaddr_ytembedded src "/etc/squid/acl/plugin/clientaddr_ytembedded"
+
+http_access allow url_ytembedded clientaddr_ytembedded
+http_reply_access allow url_ytembedded clientaddr_ytembedded

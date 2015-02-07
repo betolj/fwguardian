@@ -5,6 +5,13 @@ The Web GUI for Firewall Configuration was introduced only in 4.2 series.
 The main bugfix was made in this series.
 
 
+05 Feb 2015
+	Fix failback rtdgd.mod for lb2tb
+	Fix tfshow.cgi refresh web interface
+
+25 Jan 2015
+	Fix simpleips greylist update
+
 18 Jan 2015
 	Include "clients-per-query 0" in DNS options
 

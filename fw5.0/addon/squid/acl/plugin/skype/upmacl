@@ -1,0 +1,10 @@
+# Permissive ACL
+acl url_skype dstdom_regex -i (rad|rendezvous|\.messenger|users\.storage)\.(msn|live|hotmail)\.com \.(skype|skype-games)\.(com|4publishers\.com) \.msads\.net
+acl clientaddr_skype proxy_auth -i "/etc/squid/acl/plugin/clientaddr_skype"
+
+http_access allow clientaddr_skype ssl_ip
+http_access allow url_skype clientaddr_skype
+
+adaptation_access qlproxy1 deny url_skype
+adaptation_access qlproxy2 deny url_skype
+adaptation_access qlproxy1 deny clientaddr_skype ssl_ip

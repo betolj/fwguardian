@@ -1,0 +1,5 @@
+### Negotiate kerberos/NTLM module
+auth_param negotiate program /usr/lib/squid/negotiate_wrapper_auth --ntlm /usr/bin/ntlm_auth --diagnostics --helper-protocol=squid-2.5-ntlmssp --use-cached-creds --kerberos /usr/lib/squid/negotiate_kerberos_auth -s GSS_C_NO_NAME
+auth_param negotiate children 150 startup=20 idle=20
+auth_param negotiate keep_alive on
+

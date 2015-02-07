@@ -1,0 +1,8 @@
+# Common ACL
+acl domain_earth dstdom_regex (kh|khmdb|mt|mw)[0-9]*\.google\.com (maps|moon|earth)\.google\.com (www|geo|auth)\.keyhole\.com maps\.google\.com
+acl clientaddr_earth proxy_auth -i "/etc/squid/acl/plugin/clientaddr_googleearth"
+
+http_access deny domain_earth !clientaddr_earth all
+
+adaptation_access qlproxy1 deny domain_earth
+adaptation_access qlproxy2 deny domain_earth

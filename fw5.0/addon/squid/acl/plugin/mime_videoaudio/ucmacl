@@ -1,0 +1,21 @@
+acl req_mime_multimedia req_mime_type -i audio/ video/ application/x-mms-framed application/vnd.ms.wms-hdr.asfv1 application/x-fcs application/x-flash-video application/x-mms-framed application/x-ms-wmz
+acl rep_mime_multimedia rep_mime_type -i audio/ video/ application/x-mms-framed application/vnd.ms.wms-hdr.asfv1 application/x-fcs application/x-flash-video application/x-mms-framed application/x-ms-wmz
+acl MMS_multimedia url_regex \.(mp3|mp4|ogg|wav|wmv|flv)($|\?) \/(flowplayer|flowplayer\.controls)\- \/player\/.*\.swf ^mms\:
+#acl flash_multimedia url_regex .swf$
+
+acl clientaddr_mime_multimedia proxy_auth -i "/etc/squid/acl/plugin/clientaddr_multimedia"
+acl clientaddr_mime_multimedia proxy_auth -i "/etc/squid/acl/plugin/clientaddr_mime_videoaudio"
+acl domain_mime_multimedia dstdom_regex "/etc/squid/acl/plugin/domain_mime_videoaudio"
+
+#cache deny flash_multimedia
+http_access allow req_mime_multimedia domain_mime_multimedia
+http_access allow MMS_multimedia clientaddr_mime_multimedia
+http_access deny  MMS_multimedia !domain_mime_multimedia
+http_access deny  req_mime_multimedia !clientaddr_mime_multimedia all
+http_reply_access allow rep_mime_multimedia user_whitelist
+http_reply_access allow rep_mime_multimedia clientaddr_mime_multimedia
+http_reply_access allow rep_mime_multimedia domain_mime_multimedia
+http_reply_access deny  rep_mime_multimedia
+
+adaptation_access qlproxy1 deny req_mime_multimedia
+adaptation_access qlproxy2 deny rep_mime_multimedia

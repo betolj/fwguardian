@@ -1,0 +1,5 @@
+### NTLM Auth
+auth_param ntlm program /usr/bin/ntlm_auth --use-cached-creds --helper-protocol=squid-2.5-ntlmssp
+auth_param ntlm children 150 startup=20 idle=20
+auth_param ntlm keep_alive on
+

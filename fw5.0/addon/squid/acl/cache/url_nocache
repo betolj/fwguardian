@@ -1,0 +1,18 @@
+# Disable cache for url list
+\.channel\.facebook\.com/pull\?
+\.facebook\.com/.*/send_messages.php
+\.gov\.br/.*\.(html|htm|css|asp|php|jsp|jfs|crl)($|\?)
+\.youtube\.com$
+update\/ECF\.exe
+update\/AutocomClient\.exe
+cartolafc\.globo\.com
+mail\.google\.com
+download\.oracle\.com
+akampr\.fullproduct\.download\.microsoft\.com
+www\.pagamentodigital\.com\.br
+www\.imperdivel\.com\.br
+201\.44\.231\.131
+technet\.microsoft\.com
+proxy\.sgi\.ms\.gov\.br
+ftp\.datasus\.gov.br\/catalogo\/siops\/.*\.exe
+sisgr\.caixa\.gov\.br

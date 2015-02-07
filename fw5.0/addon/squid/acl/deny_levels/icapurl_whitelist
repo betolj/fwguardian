@@ -1,0 +1,17 @@
+# URL whitelist (regex) - only for networks and networks_greylist
+
+^http:\/\/www\.(globo|ig|bol|bol\.uol|uol|terra|guj)\.(com|com\.br)(\/$|$)
+^http:\/\/www\.terra\.(com|com\.br)\/(capa|portal)(\/$|$)
+^http:\/\/odia\.ig\.com\.br(\/$|$)
+^http:\/\/(ads|ads\.img|adserver|bol|bn)\.(ig|imguol|globo)\.(com|com\.br)\/
+bp[0-9]+\.batepapo\.uol\.com\.br
+^http:\/\/(js|img)uol\.com\/(p\/admanager|admanager)\/
+
+# Google
+(googleadservices|\.google)\.(com|com\.br)\/(pagead\/(drt\/|.*&adurl=)|aclk?)
+
+# Others
+monitor\.scup\.com\/reports
+\.gravatar\.com\/(js|css|avatar|avatar\.php)(\/|\?)
+\.dsultra\.com\/(js|css)\/.*\.(js|css)
+\.cartaexpressa\.com\.br\/adserver\/

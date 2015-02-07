@@ -1,0 +1,10 @@
+# Auth options
+authenticate_ttl 2 hour
+authenticate_ip_ttl 120 seconds
+authenticate_cache_garbage_interval 1 hour
+
+acl UserInfoControlChar urllogin [[:cntrl:]]
+http_access deny UserInfoControlChar
+
+#acl 407_response http_status 407
+#log_access deny 407_response

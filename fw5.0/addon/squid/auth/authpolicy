@@ -1,0 +1,25 @@
+## Limits
+acl max_users max_user_ip -s 1
+acl all_users proxy_auth REQUIRED
+acl shared_users proxy_auth "/etc/squid/acl/user_shared"
+
+http_access deny !all_users
+http_access deny max_users !shared_users all
+
+
+## Blacklist and Whitelist
+acl user_blacklist proxy_auth_regex -i "/etc/squid/acl/user_blacklist"
+acl user_blacklist proxy_auth_regex -i "/etc/squid/acl/bannproxy_user"
+http_access deny user_blacklist all
+adaptation_access qlproxy1 deny user_blacklist
+adaptation_access qlproxy2 deny user_blacklist
+
+acl user_whitelist proxy_auth_regex -i "/etc/squid/acl/user_whitelist"
+http_access allow user_whitelist
+adaptation_access qlproxy1 deny user_whitelist
+adaptation_access qlproxy2 deny user_whitelist
+
+
+## Caching
+acl user_nocache proxy_auth_regex "/etc/squid/acl/cache/user_nocache"
+cache deny user_nocache

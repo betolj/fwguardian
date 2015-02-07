@@ -1,0 +1,159 @@
+#!/bin/bash
+#  
+# - Commands
+#   phase1      Make a local /tmp/denylist
+#   phase2      Discover master node for updates (1h after check1) and update
+#
+
+cmd=$1
+logger=$(which logger)
+
+squidlogfile="/var/log/squid/access.log"
+directory="/etc/squid/scripts/bannproxy"
+
+auth=$(test -f /etc/squid/acl/buildauth/enabled && echo "user" || echo "ip")
+[ -f "/etc/squid/scripts/bannproxy/forceip" ] && auth="ip"
+[ -f "/etc/squid/scripts/bannproxy/forceuser" ] && auth="user"
+
+logday=$(date +%d)
+myipaddr=$(hostname -i)
+logfile="denylist_$auth.$myipaddr.$logday"
+
+
+# Log function
+plog() {
+   msg=$@
+   msg=$(echo $msg | tr '\n' ' ')
+   if [ $(echo $@ | wc -m) -gt 1 ]; then
+      $logger -i -p daemon.info -t "squid-bannproxy" "$msg"
+      echo -e "$msg"
+   fi
+}
+
+### Update blacklist
+update() {
+   cp -f /etc/squid/acl/bannproxy_$auth /tmp/bannproxy.tmp
+   for ipaddr in $(grep "\( \|\s\|\t\)proxy[0-9]*\($\| \|\s\|\t\)" /etc/hosts | awk '{print $1}');
+   do
+      ### Make a local "HTTP Proxy" GET count per IP/User
+      # Include in bannproxy list when blflag is greater then 14
+      if [ -f "/tmp/denylist_$auth.$ipaddr.$logday" ]; then 
+         while read line;
+         do
+            blflag=$(echo $line | awk '{print $1}')
+            if [ "$blflag" -gt 14 ]; then
+               banned=$(echo $line | awk '{print $2}')
+               if [ "$banned" != "-" ]; then
+                  [ $auth == "user" ] && banned="^$banned"
+                  grep -q "$banned\$" "/tmp/bannproxy.tmp" || echo $banned >> /tmp/bannproxy.tmp
+               fi
+            fi
+         done < /tmp/denylist_$auth.$ipaddr.$logday
+      fi
+   done
+   cp -f /tmp/bannproxy.tmp /etc/squid/acl/bannproxy_$auth
+   rm -f /tmp/bannproxy.tmp 2>/dev/null
+}
+
+### Search access.log file for http open proxy
+phase1() {
+   plog "Starting phase1..."
+   vargrep="proxyblind"
+   vargrep=$vargrep"$(cat $directory/denylist | sed 's/\./\./g' | sed -e "s/^/\\\|/" | tr -d '\n')"
+   rm -rf /tmp/denylist_ip\.* 2>/dev/null
+   rm -rf /tmp/denylist_user\.* 2>/dev/null
+
+   [ $auth == "ip" ] && \
+     cat $squidlogfile | grep $vargrep | awk '{ if ($3 != "-") print $3" "$7 }' | cut -d / -f 1,3 | sed -e "s/\//\/\//" | \
+        sort | uniq -c > /tmp/$logfile || \
+     cat $squidlogfile | grep $vargrep | awk '{ if ($8 != "-") print $8" "$7 }' | cut -d / -f 1,3 | sed -e "s/\//\/\//" | \
+       sort | uniq -c > /tmp/$logfile
+
+   ### Make the log event
+   echo -e "\n$(date) - Local check ($myipaddr)" >> $directory/bannproxy.log
+   cat /tmp/$logfile >> $directory/bannproxy.log
+}
+
+# Cluster checks - detect master/manager node
+nrproxy=0
+ismanager=0
+phase2() {
+   plog "Starting phase2..."
+   [ ! -f "/tmp/$logfile" ] && phase1
+
+   # Exit if cant make /tmp/logfile
+   if [ ! -f "/tmp/$logfile" ]; then
+      plog "ERROR: Sorry, a cant make /tmp/$logfile! Aborting..."
+      exit
+   fi
+
+   plog "Starting cluster tests..."
+   ctfinded=0
+   conflict=0
+   conflictaddr=""
+
+   # Discover manager node
+   previp=0
+   [ -f /tmp/clustermanager ] && ismanager=1
+   for ipaddr in $(grep "\( \|\s\|\t\)proxy[0-9]*\($\| \|\s\|\t\)" /etc/hosts | awk '{print $1}');
+   do
+      finded=0
+      nrproxy=$(( $nrproxy + 1 ))
+      if [ "$ipaddr" != "$myipaddr" ]; then
+         [ $(ssh -o "ConnectTimeout 2" $ipaddr "ls /etc/squid/scripts/squid-inotify.sh" 2>/dev/null | wc -l) -gt 0 ] && finded=1
+      else
+         previp=1
+         [ $ctfinded == 0 ] && ismanager=1
+         [ $conflict == 1 ] && conflictaddr="$ipaddr"
+      fi
+
+      ### Getting /tmp/denylist file (only master node)
+      if [ $ismanager == 1 ]; then
+         if [ ! -f /tmp/denylist_$auth.$ipaddr.$logday ]; then
+            scp $ipaddr:/tmp/denylist_$auth.$ipaddr.$logday /tmp/ 2>/dev/null
+
+            ### Make the log event
+            if [ -f "/tmp/denylist_$auth.$ipaddr.$logday" ]; then
+               plog "INFO: Success on getting denylist_$auth.$ipaddr.$logday file!"
+
+               echo -e "\n$(date) - Getting check from $ipaddr" >> $directory/bannproxy.log
+               cat /tmp/denylist_$auth.$ipaddr.$logday >> $directory/bannproxy.log
+            else
+               plog "WARN: I cant get denylist_$auth.$ipaddr.$logday file in $ipaddr node!";
+            fi
+         else
+            plog "WARN: The denylist_$auth.$ipaddr.$logday file already exists!"
+         fi
+      fi
+
+      if [ $finded == 1 ]; then
+         ((ctfinded++))
+
+         if [ $ismanager == 1 ]; then
+            if [ $previp == 0 ] || [ $(ssh -o "ConnectTimeout 2" $ipaddr "ls /tmp/clustermanager" 2>/dev/null | wc -l) -gt 0 ]; then
+               conflict=1
+               conflictaddr="$ipaddr"
+            fi
+         fi
+      fi
+   done
+
+   # Conflict action
+   if [ $conflict == 1 ]; then
+      ismanager=0
+      [ "$myipaddr" == "$conflictaddr" ] && ismanager=1
+   fi
+
+   # Change bannproxy only node is manaster or local node
+   if [ $ismanager == 1 ] || [ $nrproxy -lt 2 ]; then
+       plog "Updating /etc/squid/acl/bannproxy_$auth."
+       update
+   else
+      plog "Nothing change - only a *manager* can update /etc/squid/acl/bannproxy_$auth."
+   fi
+}
+
+
+# Run phase
+[ "$cmd" == "phase1" ] && phase1 || phase2
+

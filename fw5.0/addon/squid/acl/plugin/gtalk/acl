@@ -1,0 +1,8 @@
+# Common ACL
+acl gtalk_url url_regex -i mail\.google\.com/mail/channel/bind (talk|talkgadget|talkx\.l|chatenabled\.mail)\.google\.com tools\.google\.com/googletalk
+acl clientaddr_gtalk src "/etc/squid/acl/plugin/clientaddr_gtalk"
+
+http_access deny gtalk_url !clientaddr_gtalk
+
+adaptation_access qlproxy1 deny gtalk_url
+adaptation_access qlproxy2 deny gtalk_url

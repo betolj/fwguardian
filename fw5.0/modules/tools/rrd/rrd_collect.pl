@@ -302,9 +302,9 @@ sub ProcessMem {
               "DS:mcache:GAUGE:600:0:U",
               "DS:mswap:GAUGE:600:0:U",
 	      "RRA:AVERAGE:0.5:1:576",
-	      "RRA:MAX:0.5:6:672",
-	      "RRA:MAX:0.5:24:732",
-	      "RRA:MAX:0.5:144:1460";
+	      "RRA:MAX:0.5:3:672",
+	      "RRA:MAX:0.5:12:744",
+	      "RRA:MAX:0.5:144:730";
    }
 
    # Insert values into rrd

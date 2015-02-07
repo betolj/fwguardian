@@ -1,0 +1,261 @@
+#!/bin/bash
+#
+#  - Control files
+#    /tmp/noauto        Disable daemon reload and rsync process
+#    /tmp/nosync        Disable rsync process
+#    /tmp/noreload      Disable daemon reload
+#    /tmp/fullsync      Sync all "acl" files
+#
+
+dir=$(dirname $1)
+logger=$(which logger)
+basedir="/etc/squid"
+
+[ ! -d "$basedir/acl" ] || [ ! -f "$1" ] && exit 0
+[[ "$1" =~ .*(~|.swp|.old|.OLD|.bak|.bck|.BAK)$ ]] || [[ "$1" =~ ^$basedir/acl/(\.|((adultblocks|deny_levels|cache|ssl)/\.).*) ]] && exit 0
+
+
+# Main lock control for squid-inotify
+i=0
+locktime=$(grep "\( \|\s\|\t\)proxy[0-9]*\($\| \|\s\|\t\)" /etc/hosts | wc -l)
+[ $locktime < 1 ] && locktime=1
+locktime=$(( 2 * $locktime + 3 ))
+while (( $i < $locktime ))
+do
+  [ -f "/tmp/squid_ino.lock" ] && sleep 1 || break
+  i=$(( $i + 1 ))
+done
+touch /tmp/squid_ino.lock
+
+# Exit function
+chexit() {
+   rm -f /tmp/squid_ino.lock 2>/dev/null
+   exit 1
+}
+
+# Log function
+plog() {
+   msg=$@
+   msg=$(echo $msg | tr '\n' ' ')
+   if [ $(echo $@ | wc -m) -gt 1 ]; then
+      $logger -i -p daemon.info -t "squid-inotify" "$msg"
+      echo -e "$msg"
+   fi
+}
+
+# Cluster checks
+nosync=0
+nrproxy=0
+ismanager=0
+myipaddr=$(hostname -i)
+clcheck() {
+   $logger -i -p daemon.info -t "squid-inotify" "Starting cluster tests..."
+   ctfinded=0
+   conflict=0
+   rmconflict=0
+   ipconflict=""
+   conflictaddr=""
+
+   # Discover manager node
+   previp=0
+   [ -f /tmp/clustermanager ] && ismanager=1
+   for ipaddr in $(grep "\( \|\s\|\t\)proxy[0-9]*\($\| \|\s\|\t\)" /etc/hosts | awk '{print $1}');
+   do
+      finded=0
+      nrproxy=$(( $nrproxy + 1 ))
+      if [ "$ipaddr" != "$myipaddr" ]; then
+         [ $(ssh -o "ConnectTimeout 2" $ipaddr "ls /etc/squid/scripts/squid-inotify.sh" 2>/dev/null | wc -l) -gt 0 ] && finded=1
+      else
+         previp=1
+         [ $ctfinded == 0 ] && ismanager=1
+         [ $conflict == 1 ] && conflictaddr="$ipaddr"
+      fi
+
+      if [ $finded == 1 ]; then
+         ((ctfinded++))
+         if [ $ismanager == 1 ]; then
+            if [ $previp == 0 ] || [ $(ssh -o "ConnectTimeout 2" $ipaddr "ls /tmp/clustermanager" 2>/dev/null | wc -l) -gt 0 ]; then
+               conflict=1
+               conflictaddr="$ipaddr"
+               ipconflict="$ipaddr"
+            fi
+            [ $nrproxy == 1 ] && rmconflict=1
+         fi
+      fi
+   done
+
+   # Conflict action
+   if [ $conflict == 1 ]; then
+      [ -f /tmp/conflict ] && [ $rmconflict == 1 ] && rm -f /tmp/clustermanager 2>/dev/null
+
+      ismanager=0
+      if [ "$myipaddr" == "$conflictaddr" ]; then
+         ismanager=1
+         if [ ! -f /tmp/noauto ] && [ ! -f /tmp/nosync ]; then
+            if [ ! -f /tmp/conflict ]; then
+               [ -f /etc/squid/scripts/allow.fullsync ] && touch /tmp/fullsync
+               touch /tmp/conflict
+            else
+               rm -f /tmp/conflict
+            fi
+         fi
+      else
+         [ $previp == 1 ] && rm -f /tmp/clustermanager 2>/dev/null
+      fi
+   fi
+
+   # Disable sync for slave or local nodes
+   [ $nrproxy -lt 2 ] && ismanager=0
+   if [ "$ismanager" == 0 ]; then
+      nosync=1
+      [ $conflict == 0 ] && $logger -i -p daemon.info -t "squid-inotify" "INFO: Slave or local node detected!" || \
+                            $logger -i -p daemon.info -t "squid-inotify" "INFO: Conflict node detected (Master: $ipconflict)!"
+   else
+      [ $conflict == 0 ] && touch /tmp/clustermanager || \
+                            $logger -i -p daemon.info -t "squid-inotify" "INFO: Conflict node detected (Master: $ipconflict)!"
+      $logger -i -p daemon.info -t "squid-inotify" "INFO: MANAGER node detected!"
+   fi
+}
+
+
+# Waiting for end of write process
+sleep 2
+
+# Identify proxy config files
+acldir="$basedir/acl"
+poldir="/etc/opt/quintolabs/qlproxy/policies"
+if [ "$dir" == "$acldir/ssl" ] || [ "$dir" == "$acldir/cache" ] || [ "$dir" == "$acldir/buildauth" ] || [ "$dir" == "$acldir/deny_levels" ] || [ "$dir" == "$acldir/adultblock/content" ] || [ "$dir" == "$acldir/adultblock/heuristics" ]; then
+   files=$(ls $dir/*)
+else
+   files=$(ls $dir/clientaddr* $dir/domain_* $dir/user_*)
+   [ "$dir" == "$acldir" ] && files="$files $(ls $dir/networks* $dir/arp_* $dir/url_* $dir/serverlist $dir/plugin.sh $dir/bannproxy*)"
+fi
+files="$files $(ls $poldir/*/*.conf)"
+
+# Update control files
+noreload=0
+ctdir="$basedir/scripts/control"
+[ ! -d $ctdir ] && mkdir -p $ctdir
+if [ -f "$ctdir/synccall" ]; then
+   [ -f "$ctdir/fullsync.lock" ] && touch /tmp/fullsync.lock
+   if [ -f "$ctdir/fullsync.unlock" ]; then
+      if [ -f /tmp/fullsync.lock ]; then
+         touch /tmp/forcereload
+         rm -f /tmp/fullsync.lock 2>/dev/null
+      fi
+   fi
+   [ -f "/tmp/clustermanager" ] && rm -f /tmp/clustermanager 2>/dev/null
+   [ -f "$ctdir/noreload" ] && touch /tmp/noclreload
+   rm -f $ctdir/* 2>/dev/null
+   touch $ctdir/nosync
+   nosync=1
+else
+   [ -f /tmp/fullsync.lock ] && nrproxy=2 || clcheck
+   if [ $nrproxy -gt 1 ]; then
+      if [ -f /tmp/noauto ] || [ -f /tmp/nosync ]; then
+          $logger -i -p daemon.info -t "squid-inotify" "INFO: Using noauto or nosync option (only local changes)!"
+          [ -f /etc/squid/scripts/allow.fullsync ] && touch /tmp/fullsync
+          [ -f /tmp/noauto ] && chexit || cp -f /tmp/nosync $ctdir/
+      else
+          [ -f "/tmp/fullsync" ] && mv /tmp/fullsync $ctdir/
+      fi
+   fi
+   if [ -f /tmp/noreload ] || [ -f /tmp/noauto ]; then 
+      touch $ctdir/noreload
+      noreload=1
+   fi
+fi
+
+# Full sync lock
+[ -f "/tmp/fullsync.lock" ] && chexit
+
+# Proxy updates
+findf=0
+for i in $files; do
+   [ "$i" == "$1" ] || [ -f "$ctdir/fullsync" ] && {
+     findf=1
+     plog "Loading squid-inotify due $1 changes"
+
+     # Reloading Squid or QlProxy
+     if [ "$noreload" == 0 ] && [ ! -f /tmp/noclreload ]; then
+        if [ $1 != "$acldir/plugin.sh" ]; then
+           auxdir=$dir
+           [ "$(echo $dir | cut -d'/' -f1-6)" == "$poldir" ] || [ "$(echo $dir | cut -d'/' -f1-5)" == "/etc/squid/acl/adultblock" ] && \
+              auxdir="$acldir/deny_levels"
+           if [ "$auxdir" == "$acldir/deny_levels" ] || [ -f /tmp/forcereload ]; then
+              $logger -i -p daemon.info -t "squid-inotify" "INFO: Restarting qlproxy and squid!"
+              killall -9 qlproxyd 2>/dev/null
+              /etc/init.d/qlproxy restart
+              service squid3 restart
+              [ -f /tmp/forcereload ] && rm -f /tmp/forcereload 2>/dev/null
+           else
+              $logger -i -p daemon.info -t "squid-inotify" "INFO: Reloading squid!"
+              service squid3 reload
+           fi
+        fi
+     else
+        if [ -f /tmp/noclreload ]; then
+           rm -f /tmp/noclreload 2>/dev/null
+           plog "WARN: Disabled reload (defined by cluster call)!"
+        else
+           touch $ctdir/noreload
+           plog "WARN: Disabled reload (remove /tmp/noreload)!"
+        fi
+     fi
+     break
+   }
+done
+
+# Making config sync (any files in /etc/squid/acl)
+if [ "$nosync" == 0 ] && [ ! -f "$ctdir/nosync" ]; then
+   syncdel=""
+   touch $ctdir/synccall
+   if [ -f "$ctdir/fullsync" ]; then
+      findf=1
+      pconf="$acldir/"
+      touch $ctdir/fullsync.lock
+      rm -f $ctdir/fullsync 2>/dev/null
+      syncdel=" --delete "
+   else
+      [ $findf -gt 0 ] && touch $ctdir/fullsync.unlock
+      pconf=$1
+   fi
+   [ "$noreload" == 1 ] && touch $ctdir/noreload
+
+   if [ $findf -gt 0 ]; then
+      echo
+      for ipaddr in $(grep "\( \|\s\|\t\)proxy[0-9]*\($\| \|\s\|\t\)" /etc/hosts | awk '{print $1}');
+      do
+         if [ "$ipaddr" != "$myipaddr" ]; then
+            # Control dir
+            synclog=$(rsync -arlphv -e "ssh -i /root/.ssh/id_dsa -o 'ConnectTimeout 2' " --exclude-from=$basedir/scripts/exclude $ctdir/ root@$ipaddr:$ctdir/ 2>&1)
+            plog "Control Sync $ipaddr: $synclog"
+
+            # Proxy conf
+            if [ $(echo $pconf | wc -m) -gt 1 ]; then
+               synclog=$(rsync -arlphv -e "ssh -i /root/.ssh/id_dsa -o 'ConnectTimeout 2' " $syncdel --exclude-from=$basedir/scripts/exclude $pconf root@$ipaddr:$pconf 2>&1)
+               plog "Data Sync $ipaddr: $synclog"
+               if [ "$pconf" == "$acldir/" ]; then
+                  synclog=$(rsync -arlphv -e "ssh -i /root/.ssh/id_dsa -o 'ConnectTimeout 2' " $syncdel --exclude-from=$basedir/scripts/exclude $poldir/ root@$ipaddr:$poldir/ 2>&1)
+                  plog "Data Sync $ipaddr: $synclog"
+               fi
+            fi
+         fi
+      done
+   fi
+else
+   plog "WARN: Disabled rsync (remove /tmp/nosync)!"
+fi
+
+# Removing all control files
+rm -f $ctdir/* 2>/dev/null
+
+# Enable and make reload for fullsync
+if [ $nrproxy -gt 1 ] && [ "$pconf" == "$acldir/" ]; then
+   touch /tmp/noclreload
+   rm -f $acldir/cache/syncreload 2>/dev/null
+   echo 0 > $acldir/cache/syncreload
+fi
+
+# Removing the main lock control
+rm -f /tmp/squid_ino.lock 2>/dev/null

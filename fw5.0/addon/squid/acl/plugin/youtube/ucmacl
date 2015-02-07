@@ -1,0 +1,12 @@
+acl youtube_domain dstdomain .youtube.com .googlevideo.com .video.google.com
+acl clientaddr_youtube proxy_auth -i "/etc/squid/acl/plugin/clientaddr_youtube"
+cache allow youtube_domain
+#quick_abort_min -1 KB
+
+http_access allow youtube_domain clientaddr_videos
+http_access allow youtube_domain clientaddr_youtube
+http_access deny  youtube_domain all
+http_reply_access allow youtube_domain clientaddr_youtube
+
+adaptation_access qlproxy1 deny youtube_domain
+adaptation_access qlproxy2 deny youtube_domain
