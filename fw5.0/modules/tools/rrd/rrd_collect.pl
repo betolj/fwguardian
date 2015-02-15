@@ -286,10 +286,10 @@ sub ProcessMem {
    $fwmemory{'MemTotal'} -= ($fwmemory{'MemFree'} + $fwmemory{'Buffers'} + $fwmemory{'Cached'});
    $fwmemory{'SwapTotal'} -= $fwmemory{'SwapFree'};
 
-   $fwmemory{'MemTotal'} = $fwmemory{'MemTotal'} * 1024;
-   $fwmemory{'Buffers'} = $fwmemory{'Buffers'} * 1024;
-   $fwmemory{'Cached'} = $fwmemory{'Cached'} * 1024;
-   $fwmemory{'SwapTotal'} = $fwmemory{'SwapTotal'} * 1024;
+   $fwmemory{'MemTotal'} = int($fwmemory{'MemTotal'} * 1024);
+   $fwmemory{'Buffers'} = int($fwmemory{'Buffers'} * 1024);
+   $fwmemory{'Cached'} = int($fwmemory{'Cached'} * 1024);
+   $fwmemory{'SwapTotal'} = int($fwmemory{'SwapTotal'} * 1024);
    print "Memory - Used: $fwmemory{'MemTotal'}, Buffered: $fwmemory{'Buffers'}, Cached: $fwmemory{'Cached'}, Swaped: $fwmemory{'SwapTotal'}\n";
 
    # If rrdtool database doesn't exist, create it
@@ -301,10 +301,10 @@ sub ProcessMem {
               "DS:mbuffer:GAUGE:600:0:U",
               "DS:mcache:GAUGE:600:0:U",
               "DS:mswap:GAUGE:600:0:U",
-	      "RRA:AVERAGE:0.5:1:576",
-	      "RRA:MAX:0.5:3:672",
-	      "RRA:MAX:0.5:12:744",
-	      "RRA:MAX:0.5:144:730";
+	      "RRA:AVERAGE:0.5:1:288",
+	      "RRA:AVERAGE:0.5:3:672",
+	      "RRA:AVERAGE:0.5:12:744",
+	      "RRA:AVERAGE:0.5:144:730";
    }
 
    # Insert values into rrd

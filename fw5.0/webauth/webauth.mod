@@ -1003,7 +1003,8 @@ sub chkperm {
   $allow = verify_adminrequest($peer);
 
   ### Check admin cookie session
-  if ($session->is_expired || $session->is_empty) {
+  my $diftime = $session->atime - $session->ctime;
+  if ($session->is_expired || $session->is_empty || $diftime >= $session->param("_SESSION_ETIME")) {
      $invalid = 1;
      $session->delete;
   }
@@ -2294,8 +2295,8 @@ sub get_response {
            $_ =~ s/\n//;
            ($fwcookie, $read_cookie) = split /=/, $_ if ($fwcookie ne $cooktype);
        }
-       $ENV{'COOKIE'} = $read_cookie;
-       $ENV{'HTTP_COOKIE'} = $read_cookie;
+       #$ENV{'COOKIE'} = $read_cookie;
+       $ENV{'HTTP_COOKIE'} = "$fwcookie=$read_cookie";
 
        $nurl =~ s/\/admin\/index2\.html//g;
     }
@@ -2483,11 +2484,7 @@ sub get_response {
           ${$res->content_ref} =~ s/\b_WEBLOG\b/https:\/\/$pubd:$svsport\/login.cgi/;
        }
     }
-    if ($url->path =~ /\/admin(\/(index.html|\/)|$)$/) {
-       ${$res->content_ref} =~ s/\bMYADDR\b/$myaddr/;
-       #${$res->content_ref} =~ s/\/admlogin.cgi/_WEBLOG/;
-       #${$res->content_ref} =~ s/\b_WEBLOG\b/https:\/\/$pubd:$svsport\/admlogin.cgi/;
-    }
+    ${$res->content_ref} =~ s/\bMYADDR\b/$myaddr/ if ($url->path =~ /\/admin(\/(index.html|\/)|$)$/);
 
     $res->content_length(length($res->content_ref)) if (defined $res->content_ref);
     $res->date(time);

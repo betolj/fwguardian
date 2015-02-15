@@ -42,6 +42,7 @@
 3c070c9e29b548ae54944db86698d4be  vpn/ipsec/options.l2tpd
 3c258d53cc5914d5043f675bb8e79726  ../webauth/includes/fwroute.pl
 3f809247b12529fece61734fd616ff20  ../webauth/includes/fwdiag.pl
+3fb8fce2cc53524855e89ae9d05aa03a  tools/rrd/rrd_collect.pl
 41d0b8dd19e7b65e92346173a6278887  ../webauth/includes/dhcplease.pl
 421f52ba0024a14973368fe2b41134c8  ../webauth/includes/fwmsn.pl
 442972b83e01257a8ed1b1ad9d3b5cbe  tools/fwguardian
@@ -90,7 +91,6 @@
 92697ba7d73e545720a2de5dd6c2236e  include/tfshape.rules.inc
 92e660085e5b357edb612c5dd4e17afd  tools/ips/Templates/ALERTS
 9556a059d1d54766c15fe871116f1598  tools/ssl/mkssl.sh
-95e5435d06958aaf1e64197bcd64cb7a  tools/rrd/rrd_collect.pl
 95ff6e1330d923720a906f2ee8033235  ../webauth/includes/fwmasq.pl
 964ea3ef2b55e54a36f6a30fb9ccc392  include/cluster.base.inc
 99efaa05c048771524f34653f37d2cf5  tools/msnsniffer/src/pcap_stuff.cpp
