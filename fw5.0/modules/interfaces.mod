@@ -72,8 +72,8 @@ set_interface() {
    ifname=$1
 
    ifdisp=0
+   ((ifcount++))
    for i in $(echo $@); do
-      ((ifcount++))
       [ $i != "auto" ] && [ $i != "none" ] && [ $ifcount -lt 10 ] && ifdisp=1
    done
 
@@ -144,6 +144,8 @@ if [ -f /tmp/interfaces.update ] && [ -f /var/tmp/fw.mybridges ]; then
    }' | $sh -
    rm -f /var/tmp/fw.mybridges
 fi
+
+ifcount=0
 cat $FW_DIR/interfaces | grep -v "^[\s]*#" | \
 while read line; do
    set_interface $line

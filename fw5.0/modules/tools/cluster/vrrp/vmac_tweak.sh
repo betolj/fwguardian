@@ -78,12 +78,12 @@ EOF
       fi
    fi
 
-   [ -f "/usr/share/fwguardian/cluster/vip.up" ] && /bin/bash /usr/share/fwguardian/cluster/vip.up $1 $2
+   [ -f "/usr/share/fwguardian/cluster/vip.up" ] && $sh /usr/share/fwguardian/cluster/vip.up $1 $2
 else
-   [ -f /var/tmp/cluster.vip.$1 ] && rm -f /var/tmp/cluster.vip.$1 2>/dev/null
-
    if [ "$3" == "BACKUP" ]; then
       # BACKUP state
+      [ -f /var/tmp/cluster.vip.$1 ] && rm -f /var/tmp/cluster.vip.$1 2>/dev/null
+
       if [ -f "/usr/share/fwguardian/cluster.multicastmac" ]; then
          [ -f /var/tmp/keepalived.fail.$1 ] && rm -f /var/tmp/keepalived.fail.$1 2>/dev/null
          /usr/local/bin/nfcluster.sh
@@ -101,7 +101,7 @@ else
          fi
       fi
 
-      [ -f "/usr/share/fwguardian/cluster/vip.down" ] && /bin/bash /usr/share/fwguardian/cluster/vip.down $1 $2
+      [ -f "/usr/share/fwguardian/cluster/vip.down" ] && $sh /usr/share/fwguardian/cluster/vip.down $1 $2
    else
       # VFAULT state
       [ -f "/usr/share/fwguardian/cluster.sync_state" ] && $conntrackd -t -C /etc/conntrackd/conntrackd.conf 2>&1 | logger "conntrackd: -t $(xargs)"
@@ -111,5 +111,5 @@ fi
 
 # Default action
 ls /sys/class/net | awk '{ if ($1 != "lo") print "ip ne flush dev "$1; }' | $sh - 2>/dev/null
-[ -f /usr/local/bin/vrrpupd.sh ] && /usr/local/bin/vrrpupd.sh $1 $3
+[ -f /usr/local/bin/vrrpupd.sh ] && $sh /usr/local/bin/vrrpupd.sh $1 $3
 

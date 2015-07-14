@@ -110,18 +110,18 @@ if [ -f /usr/share/fwguardian/keepalive.ctl ] && [ "$rtcache" -lt 2 ]; then
    fi
    cat /usr/share/fwguardian/modules/rttables.ctl | awk -v lbeq=$lbeq '{ cncount++; \
        if (cncount > 1 && $2) { \
-          if (lbeq == 1) print "iptables -t mangle -A CNTRACK -o "$2" -m mark --mark 0x0 -j CONNMARK --set-mark "$5; \
+          if (lbeq == 1) print "iptables -t mangle -A CNTRACK -o "$2" -m connmark --mark 0x0 -j CONNMARK --set-mark "$5; \
           else { \
              print "ipset destroy lb_"$1" 2>/dev/null"; \
              print "ipset create lb_"$1" hash:ip,port,ip timeout "lbeq; \
              print "iptables -t mangle -A CNTRACK -o "$2" -j SETMARK"; \
-             print "iptables -t mangle -A SETMARK -o "$2" -m mark --mark 0x0 -j CONNMARK --set-mark "$5; \
-             print "iptables -t mangle -A SETMARK -m mark --mark "$5" -j SET --add-set lb_"$1" src,dstport,dst --timeout "lbeq" --exist"; \
+             print "iptables -t mangle -A SETMARK -o "$2" -m connmark --mark 0x0 -j CONNMARK --set-mark "$5; \
+             print "iptables -t mangle -A SETMARK -m connmark --mark "$5" -j SET --add-set lb_"$1" src,dstport,dst --timeout "lbeq" --exist"; \
              print "iptables -t mangle -A GETMARK -m set --match-set lb_"$1" src,dstport,dst -j CONNMARK --set-mark "$5; \
           } \
        } \
    }' | tee -a $FW_DIR/../build/fwroute.tables.kalive | $sh - 2>>$FW_DIR/../logs/fwroute.tables.kalive.err
-   $iptables -t mangle -A CNTRACK -m mark ! --mark 0x0 -j CONNMARK --save-mark 2>/dev/null
+   $iptables -t mangle -A CNTRACK -m connmark ! --mark 0x0 -j CONNMARK --save-mark 2>/dev/null
 fi
 
 ## Undo rules

@@ -248,7 +248,7 @@ sub chkPeers {
          }
       }
 
-      if (-d $memberpath && not -e "$memberpath/status.dead") {
+      if (-d $memberpath && not (-e "$memberpath/status.dead" || -e "$memberpath/status.lock")) {
          if ($cmd eq "flush-rsync") {
             rmtree("$memberpath") if (-e "$memberpath/rsync");
          }
@@ -268,9 +268,13 @@ sub chkPeers {
             else {
                if (-e "$DATA_DIR/sshkey/$peeraddr.cldsa.key.pub") {
                   if (-e "$memberpath/status.ok" && $waitst > 3) {
-                     system("touch $memberpath/status.fault2") if (-e "$memberpath/status.fault1");
-                     system("touch $memberpath/status.fault1") if (-e "$memberpath/status.warn");
-                     system("touch $memberpath/status.warn");
+                     if (-e "$memberpath/status.fault1") {
+                        system("touch $memberpath/status.fault2");
+		     }
+		     else {
+                        system("touch $memberpath/status.fault1") if (-e "$memberpath/status.warn");
+                        system("touch $memberpath/status.warn");
+		     }
                   }
                }
                else {
@@ -668,6 +672,7 @@ sub mcastServer {
       my $memberpath = "$DATA_DIR/members/$peeraddr";
       if ($cmd eq "hello" && -e "$allowedmb") {
          if (-d $memberpath) {
+            system("touch $memberpath/status.lock");
             if (-e "$DATA_DIR/sshkey/$peeraddr.cldsa.key.pub" || $peeraddr eq $mbaddr) {
                if (-e "$allowedmb.forcesync") {
                   force_sync($peeraddr) if ($peeraddr ne $mbaddr);
@@ -731,6 +736,8 @@ sub mcastServer {
                   rmtree("$memberpath/status.fault2") if (-e "$memberpath/status.fault2");
                }
             }
+
+	    system("rm -f $memberpath/status.lock") if (-e "$memberpath/status.lock");
          }
          else {
             mkpath("$memberpath");

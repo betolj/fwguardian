@@ -45,7 +45,7 @@ function lastqos() {
          if (bwlflow[bwname[i]]) {
             split(bwlflow[bwname[i]],auxparam,"/");
             print "tc qdisc add dev "bwa_if" parent "classid[bwname[i]]" handle "leafhandle" sfq divisor "auxparam[2],perturb,limit;
-            if (auxparam[1] && auxparam[2]) print "tc filter add dev "bwa_if" protocol ip pref 1 parent "leafhandle": handle "leafhandle" flow hash keys "auxparam[1]" divisor "auxparam[2],perturb;
+            if (auxparam[1] && auxparam[2]) print "tc filter add dev "bwa_if" protocol all pref 1 parent "leafhandle": handle "leafhandle" flow hash keys "auxparam[1]" divisor "auxparam[2],perturb;
          }
          else print "tc qdisc add dev "bwa_if" parent "classid[bwname[i]]" handle "leafhandle" sfq "perturb,limit;
       }

@@ -20,6 +20,7 @@ sedipt=$(echo $iptables | sed "s/\//\\\\\//g")
 igawk=$(which igawk 2>/dev/null)
 
 fwver=5.0.stable
+$FW_DIR/modules/fwlock.sh lock $$
 
 ### Make control dir 
 [ ! -d /usr/share/fwguardian/include ] || \
@@ -175,6 +176,10 @@ case "$lnoption" in
       fi ;;
     --reload-dnat|--reload-nat)
       echo "Reloading... NAT config !!!"
+      if [ -f /usr/share/fwguardian/modules/rttables.ctl ]; then
+         flush_rttables
+         $FW_DIR/modules/rttables.mod $FW_DIR/routing >/dev/null 2>/dev/null
+      fi
       $FW_DIR/modules/rtnat.mod $FW_DIR/routing >/dev/null 2>/dev/null ;;
     --reload-qos)
       echo "Reloading... QoS config !!!"
@@ -196,7 +201,8 @@ case "$lnoption" in
     --reload-advrouting|--reload-rttables)
       flush_rttables
       echo "Reloading... alternative routing tables definitions !!!"
-      $FW_DIR/modules/rttables.mod $FW_DIR/routing >/dev/null 2>/dev/null ;;
+      $FW_DIR/modules/rttables.mod $FW_DIR/routing >/dev/null 2>/dev/null
+      [ -f /usr/share/fwguardian/modules/rtnat.ctl ] && $FW_DIR/modules/rtnat.mod $FW_DIR/routing >/dev/null 2>/dev/null ;;
     --configure-cluster)
       echo "Configuring... Cluster mode and VIP rules !!!"
       $FW_DIR/modules/clusterbase.mod $FW_DIR/cluster >/dev/null ;;
@@ -293,6 +299,8 @@ esac
 if [ "$lnoption" != "" ]; then
    $FW_DIR/modules/flushnftables.mod start 2>/dev/null
    [ -x $FW_DIR/postload ] && $FW_DIR/postload $lnoption 2>&1 >>$FW_DIR/logs/postload.err
+
+   $FW_DIR/modules/fwlock.sh unlock $$
    exit 0
 fi
 
@@ -533,6 +541,7 @@ dosprotect() {
              $iptables -A Do_SYNPROXY -m recent --rcheck --name dropips -j RETURN
              $iptables -A Do_SYNPROXY -p tcp --syn -m recent --name checkips --set
           fi
+          [ "$IPSQ" != "0" ] && $iptables -A Do_SYNPROXY -j fw_intIPS 2>/dev/null
 
           TCPOPT=""
           . $FW_DIR/securityaddon/synproxy-opts
@@ -883,8 +892,6 @@ if [ "$IP_FWD" == "yes" ] || [ "$SHARENET" == "yes" ]; then
      $iptables -t mangle -N CNTRACK 2>/dev/null
      $iptables -t mangle -A CNTRACK -m mark ! --mark 0x0 -j CONNMARK --save-mark 2>/dev/null
      $iptables -t mangle -A POSTROUTING -j CNTRACK
-
-     $iptables -t mangle -A PREROUTING -m mark --mark 0x0 -j CONNMARK --restore-mark 2>/dev/null
   fi
 
   #### Adv default gateway
@@ -928,6 +935,7 @@ if [ "$IP_FWD" == "yes" ] || [ "$SHARENET" == "yes" ]; then
   fi
 
   $iptables -D INPUT -p udp --sport 53 -m comment --comment "restart" -j ACCEPT
+  [ -f /usr/share/fwguardian/keepalive.ctl ] && $iptables -t mangle -A PREROUTING -m mark --mark 0x0 -j CONNMARK --restore-mark 2>/dev/null
 
   for i in $(echo ${IFRT[*]});
   do
@@ -1030,7 +1038,14 @@ done
 
 #### Security addons: global IPS and anti-P2P filters
 # - you can disable this global feature and make manual configuration into fwroute.rules
-if [ -f /usr/share/fwguardian/modules/global_ipp2p.ctl ] || [ -f /usr/share/fwguardian/modules/global_ips.ctl ]; then
+setp2p=0
+if [ -f /usr/share/fwguardian/modules/global_ipp2p.ctl ]; then
+   setp2p=1
+   $iptables -t mangle -N DropP2P 2>/dev/null
+   $iptables -t mangle -A DropP2P -m limit --limit 2/s --limit-burst 2 -j LOG --log-level info --log-prefix "DROP profile DropP2P "
+   $iptables -t mangle -A DropP2P -j DROP
+fi
+if [ $setp2p == 1 ] || [ -f /usr/share/fwguardian/modules/global_ips.ctl ]; then
   grep -v '^\s*\(#\|;\|$\)' $FW_DIR/interfaces | while read i; do
      suips=$(echo $i | awk '{ print $10; }')
      ipp2p=$(echo $i | awk '{ print $11; }')
@@ -1054,10 +1069,7 @@ if [ -f /usr/share/fwguardian/modules/global_ipp2p.ctl ] || [ -f /usr/share/fwgu
         fi
 
         # Drop P2P: You can use "mangle:DropP2P" policy in profile.def to write bypass rules
-        if [ -f /usr/share/fwguardian/modules/global_ipp2p.ctl ] && [ "$ipp2p" == "1" ]; then
-           $iptables -t mangle -N DropP2P 2>/dev/null
-           $iptables -t mangle -A DropP2P -m limit --limit 2/s --limit-burst 2 -j LOG --log-level info --log-prefix "DROP profile DropP2P "
-           $iptables -t mangle -A DropP2P -j DROP
+        if [ $setp2p == 1 ] && [ "$ipp2p" == "1" ]; then
            $iptables -t mangle -A POSTROUTING $outdev -m ipp2p --edk --kazaa --gnu --bit --apple --winmx --soul --ares -j DropP2P
         fi
      fi
@@ -1225,5 +1237,7 @@ if [ "$WEB_SERVER" == "yes" ]; then
 fi
 
 [ -x $FW_DIR/postload ] && $FW_DIR/postload 2>&1 >>$FW_DIR/logs/postload.err
+
+$FW_DIR/modules/fwlock.sh unlock $$
 
 echo "Firewall... Finished!"

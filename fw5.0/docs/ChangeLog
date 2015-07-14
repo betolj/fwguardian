@@ -4,6 +4,26 @@ FwGuardian 5.0
 The Web GUI for Firewall Configuration was introduced only in 4.2 series.
 The main bugfix was made in this series.
 
+13 Jul 2015
+	clusterctl.pl fix	
+
+09 Jun 2015
+	Fix SYNPROXY with IPS (suricata) inline mode
+	Add WPScan user-agent simple-ips blacklist
+
+06 Apr 2015
+	Include lock control (fwlock.sh) for exclusive script call
+
+10 Mar 2015
+	Fix CONNMARK strategy for load balance without routing cache
+
+05 Mar 2015
+	Include a "servername" option in webauth config
+
+04 Mar 2015
+	Fix "protocol" type in SQF flow filter
+	Fix display network interfaces
+	Apply connmark check with iproute2 load balance
 
 05 Feb 2015
 	Fix failback rtdgd.mod for lb2tb

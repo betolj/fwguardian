@@ -168,6 +168,10 @@
                              fmark[contgw]=gmark; findgw=1;
                           }
                        }
+                       if (findgw==1) {
+                          if (contgw < 2) print "iptables -t mangle -N PrTAB 2>/dev/null";
+                          print "iptables -t mangle -I PrTAB "rtint,srcaux,dstaux,dstip,pproto" -m conntrack --ctstate NEW -j CONNMARK --set-mark "gmark;
+                       }
                     }
 
                     ## Define define target ports (exist a specified socket port?) and make mark rules if findgw equals "1".

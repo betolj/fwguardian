@@ -1639,6 +1639,8 @@ sub read_config_file {
             } elsif ($cmd eq "restrict_module") {
 	        my (undef, $val1, $val2) = split /\s+/, $_, 3;
                 push(@{$ckmoduser{$val1}}, "$val2");
+            } elsif ($cmd eq "server.name") {
+                $servername = $val;
             } elsif ($cmd eq "maxip.sess.admin") {
                 $maxip{'admin'} = $val;
             } elsif ($cmd eq "maxip.sess.captive") {
@@ -2382,7 +2384,13 @@ sub get_response {
 
            $commitRedir = 1;
         }
-        $pubd = `hostname -i` if ($pubd eq "" || not $pubd);
+
+        if ($servername && $servername eq $targetHost) {
+           $pubd = $servername;
+        }
+        else {
+           $pubd = `hostname -i` if ($pubd eq "" || not $pubd);
+        }
         $myaddr = "http://$pubd:$svport";
         $myaddr = "https://$pubd:$svsport" if ($svsport) ;
 

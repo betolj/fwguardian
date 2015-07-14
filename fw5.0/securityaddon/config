@@ -3,6 +3,7 @@ user-agent nessus nospace
 user-agent Openvas nospace
 user-agent w3af.sourceforge
 user-agent ZmEu 
+user-agent WPScan
 user-agent Netsparker nospace
 user-agent Acunetix nospace
 check-ports 80,443,8080 synproxy
