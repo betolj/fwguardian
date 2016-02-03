@@ -38,4 +38,5 @@ idle 1800
 connect-delay 5000
 lcp-echo-interval 30
 lcp-echo-failure 4
+persist
 

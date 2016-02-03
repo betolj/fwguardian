@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # "POST /admin/chmodules.cgi" -> save button
 sub chmodules {
@@ -59,8 +59,8 @@ sub chmodules {
     }
     else {
        if ($canch == 1) {
-          $msg[0] = "Aplicando as regras de firewall!";
-          $msg[1] = "Applying firewall rules!";
+          $msg[0] = "Recarregando as regras de firewall!";
+          $msg[1] = "Reloading firewall rules!";
           $msg2[0] = "<font size=\'2\'>Recarregando todas as regras...</font>";
           $msg2[1] = "<font size=\'2\'>Full reloading...</font>";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "<font size=\'2\'>$msg2[$FW_LANG]</font>");
@@ -238,8 +238,8 @@ HTMLCODE
     $msg[0] = "Salvar";
     $msg[1] = "Save";
     print FILE "<a href=\"#\" id=\"btsav\" class=\"uibt\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";;
     print FILE " <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
     print FILE "</form></DIV></body>";
     print FILE "</HTML>";

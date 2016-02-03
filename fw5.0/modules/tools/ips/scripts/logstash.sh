@@ -20,8 +20,16 @@ sudo apt-get update
 sudo apt-get -y install oracle-java7-installer
 
 
-# Step 2 - Elasticsearch install
-echo "- Step 2 / 5 - Elasticsearch install"
+# Install logstash
+echo "- Step 2 / 5 - Logstash install"
+echo 'deb http://packages.elasticsearch.org/logstash/1.4/debian stable main' | sudo tee /etc/apt/sources.list.d/logstash.list
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D27D666CD88E42B4
+sudo apt-get update
+apt-get -f install logstash=1.4.2-1-2c0f5a1
+sudo cp -f $FW_DIR/logstash.conf /etc/logstash/conf.d/
+
+# Step 3 - Elasticsearch install
+echo "- Step 3 / 5 - Elasticsearch install"
 chown logstash.root /var/log/suricata/eve.json
 chmod g+r /var/log/suricata/eve.json
 sudo wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
@@ -32,8 +40,8 @@ sudo cp -f $FW_DIR/elasticsearch.yml /etc/elasticsearch
 sudo update-rc.d elasticsearch defaults 95 10
 
 
-# Step 3 - Kibana install
-echo "- Step 3 / 5 - Kibana install"
+# Step 4 - Kibana install
+echo "- Step 4 / 5 - Kibana install"
 sudo wget https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz
 sudo tar xvf kibana-3.1.0.tar.gz
 sudo cat /opt/kibana-3.1.0/config.js | sed '/elasticsearch:/ s/:9200/:80/' > /tmp/config.tmp
@@ -42,26 +50,14 @@ sudo mkdir -p /var/www/kibana3
 sudo cp -R /opt/kibana-3.1.0/* /var/www/kibana3/
 
 
-# Step 4 - Nginx install
-echo "- Step 4 / 5 - Nginx installl"
+# Step 5 - Nginx install
+echo "- Step 5 / 5 - Nginx installl"
 sudo apt-get -y install nginx
-sudo wget https://github.com/elasticsearch/kibana/raw/master/sample/nginx.conf
-sudo cat /opt/nginx.conf | sed '/^\s*root / s/root .*/root \/var\/www\/kibana3;/' > /tmp/config.tmp
-sudo cp -f /tmp/config.tmp /opt/nginx.conf
-sudo cat /opt/nginx.conf | sed "/^\s*server_name / s/server_name .*/server_name $(hostname -i);/" > /tmp/config.tmp
-sudo cp -f /tmp/config.tmp /opt/nginx.conf
-sudo cp /opt/nginx.conf /etc/nginx/sites-available/default
-sudo rm -f /tmp/config.tmp 2>/dev/null
+sudo cp -f $FW_DIR/nginx.conf /etc/nginx/
+sudo cp -f $FW_DIR/nginx.default.conf /etc/nginx/sites-available/default
 sudo apt-get -y install apache2-utils
 sudo htpasswd -c /etc/nginx/conf.d/kibana.myhost.org.htpasswd ipsadmin
 
-
-# Install logstash
-echo "- Step 5 / 5 - Logstash install"
-echo 'deb http://packages.elasticsearch.org/logstash/1.4/debian stable main' | sudo tee /etc/apt/sources.list.d/logstash.list
-sudo apt-get update
-sudo cp -f $FW_DIR/logstash.conf /etc/logstash/conf.d/
-apt-get -f install logstash=1.4.2-1-2c0f5a1
 
 
 # Restart log services

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.2 - Version 5.0
+#Rev.3 - Version 5.0
 
 # "POST /admin/chinput.cgi" -> delete or add button
 sub chinput {
@@ -149,8 +149,8 @@ sub chinput {
     else {
        my $rtime = 2;
        if ($canch == 1) {
-          $msg[0] = "Aplicando as regras de firewall!";
-          $msg[1] = "Applying firewall rules!";
+          $msg[0] = "Recarregando as regras de firewall!";
+          $msg[1] = "Reloading firewall rules!";
           $msg2[0] = "Com";
           $msg2[1] = "With";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "<font size=\'2\'>$msg2[$FW_LANG] --reload-rules</font>");
@@ -1091,8 +1091,8 @@ HTMLCODE
     $msg[0] = "Apagar";
     $msg[1] = "Delete";
     print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
 
 print FILE << "HTML";

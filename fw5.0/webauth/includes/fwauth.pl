@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # "show users" in select box (max: 8000)
 sub getauthuser {
@@ -198,8 +198,8 @@ sub chauthmapps {
     else {
        my $rtime = 2;
        if ($canch == 1) {
-          $msg[0] = "Aplicando as regras de firewall!";
-          $msg[1] = "Applying firewall rules!";
+          $msg[0] = "Recarregando as regras de firewall!";
+          $msg[1] = "Reloading firewall rules!";
           $msg2[0] = "Com";
           $msg2[1] = "With";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "<font size=\'2\'>$msg2[$FW_LANG] --reload-rules</font>");
@@ -638,8 +638,8 @@ HTMLCODE
    print FILE "<SELECT id=\"seluserid\" name=\"seluser\" style=\"Font-Family: Arial, Helvetica; width:80%\" size=\"6\" multiple>";
    getauthuser;
    print FILE "</SELECT><BR />";
-   $msg[0] = "Aplica";
-   $msg[1] = "Apply";
+   $msg[0] = "Recarregar";
+   $msg[1] = "Reload";
    print FILE " <INPUT type=\"button\" id=\"chUser\" value=\"$msg[$FW_LANG]\">";
    $msg[0] = "Cancela";
    $msg[1] = "Cancel";
@@ -682,8 +682,8 @@ HTMLCODE
    $msg[0] = "Apagar";
    $msg[1] = "Delete";
    print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-   $msg[0] = "Aplicar";
-   $msg[1] = "Apply";
+   $msg[0] = "Recarregar";
+   $msg[1] = "Reload";
    print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
 print FILE << "HTML";
     <form name="fauth">
@@ -1120,8 +1120,8 @@ HTMLCODE
    $msg[0] = "Apagar";
    $msg[1] = "Delete";
    print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-   $msg[0] = "Aplicar";
-   $msg[1] = "Apply";
+   $msg[0] = "Recarregar";
+   $msg[1] = "Reload";
    print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
 print FILE << "HTML";
     <form name="fauth">

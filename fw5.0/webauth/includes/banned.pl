@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.0 - Version 5.0
+#Rev.1 - Version 5.0
 
 # "POST /admin/chbanned.cgi" -> save or reload button
 sub chbanned {
@@ -106,16 +106,16 @@ sub chbanned {
        system("rm -f /var/tmp/bannedfile 2>/dev/null");
        $msg[0] = "A lista negra foi atualizada (<font color=\'Navy\'><i>$dtype</i>)</font>!";
        $msg[1] = "The blacklist have been updated (<font color=\'Navy\'><i>$dtype</i></font>)!";
-       $msg2[0] = "Clique em <strong><i>Aplicar</i></strong>.";
-       $msg2[1] = "Click in <strong><i>Apply</i></strong>.";
+       $msg2[0] = "Clique em <strong><i>Recarregar</i></strong>.";
+       $msg2[1] = "Click in <strong><i>Reload</i></strong>.";
        $txtvalue = msgbox("info", "$msg[$FW_LANG]", "$msg2[$FW_LANG]");
 
        rsyncupdate("$dfile", "", "change") if (-e "/usr/share/fwguardian/modules/clusterfw.ctl" && ($srcfile eq "default" || $srcfile =~ /^rsync_/));
     }
     else {
        if ($canch == 1) {
-          $msg[0] = "Aplicando as regras da lista negra (<font color=\'Navy\'>$dtype</font>)!";
-          $msg[1] = "Applying the blacklist rules (<font color=\'Navy\'>$dtype</font>)!";
+          $msg[0] = "Recarregando as regras da lista negra (<font color=\'Navy\'>$dtype</font>)!";
+          $msg[1] = "Reloading the blacklist rules (<font color=\'Navy\'>$dtype</font>)!";
           $msg2[0] = "<font size=\'2\'>Regras definidas no arquivo banned$dtype!</font>";
           $msg2[1] = "<font size=\'2\'>Rules by banned$dtype file!</font>";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "<font size=\'2\'>$msg2[$FW_LANG]");
@@ -531,20 +531,20 @@ HTMLCODE
     ### Finish banned.html
     print FILE "<BR /><BR />";
     print FILE "<form name=\"fiBanned\" action=\"/admin/chbanned.cgi\" method=\"post\">";
-    $msg[0] = "Aplicar Rotas";
-    $msg[1] = "Apply Routes";
-    $msg2[0] = "Aplicar Filtro de Pct";
-    $msg2[1] = "Apply Pkt Filter";
+    $msg[0] = "Recarregar Rotas";
+    $msg[1] = "Reload Routes";
+    $msg2[0] = "Recarregar Filtro de Pct";
+    $msg2[1] = "Reload Pkt Filter";
     print FILE "<INPUT type=\"submit\" name=\"ReloadFwR\" value=\"$msg[$FW_LANG]\" style=\"visibility:hidden; position:absolute;\">";
     print FILE "<INPUT type=\"submit\" name=\"ReloadFwA\" value=\"$msg2[$FW_LANG]\" style=\"visibility:hidden; position:absolute;\">";
     $msg[0] = "Cancelar";
     $msg[1] = "Cancel";
     print FILE "<a href=\"#\" id=\"btcan\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar rotas";
-    $msg[1] = "Apply routes";
+    $msg[0] = "Recarregar rotas";
+    $msg[1] = "Reload routes";
     print FILE " &nbsp; <a href=\"#\" id=\"btrel1\" class=\"uibt\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar filtro pct";
-    $msg[1] = "Apply access filters";
+    $msg[0] = "Recarregar filtro pct";
+    $msg[1] = "Reload access filters";
     print FILE " <a href=\"#\" id=\"btrel2\" class=\"uibt\">$msg[$FW_LANG]</a>";
 
     print FILE "</form></DIV></body>";

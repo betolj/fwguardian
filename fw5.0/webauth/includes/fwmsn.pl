@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # "POST /admin/chmsncheck.cgi" -> save button (check options)
 sub chmsncheck {
@@ -221,8 +221,8 @@ sub chfwmsn {
     else {
        my $rtime = 2;
        if ($canch == 1) {
-          $msg[0] = "Aplicando as regras de firewall!";
-          $msg[1] = "Applying firewall rules!";
+          $msg[0] = "Recarregando as regras de firewall!";
+          $msg[1] = "Reloading firewall rules!";
           $msg2[0] = "<font size=\'2\'>Recarregando as regras de MSN...</font>";
           $msg2[1] = "<font size=\'2\'>Reloading the MSN rules...</font>";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "$msg2[$FW_LANG]");
@@ -713,8 +713,8 @@ HTMLCODE
     $msg[0] = "Apagar";
     $msg[1] = "Delete";
     print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
     print FILE "</div>";
 
@@ -780,8 +780,8 @@ HTMLCODE
     $msg[0] = "Cancelar";
     $msg[1] = "Cancel";
     print FILE " &nbsp; <a href=\"#\" id=\"btcan2\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href=\"#\" id=\"btrel2\" class=\"uibt\">$msg[$FW_LANG]</a>";
     print FILE "</div>";
 

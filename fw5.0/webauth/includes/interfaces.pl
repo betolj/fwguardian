@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.0 - Version 5.0
+#Rev.1 - Version 5.0
 
 # "POST /admin/chinterface.cgi" -> save button
 sub chinterfaces {
@@ -101,8 +101,8 @@ sub chinterfaces {
     }
     else {
        my $rtime = 2;
-       $msg[0] = "Aplicando as regras de firewall!";
-       $msg[1] = "Applying firewall rules!";
+       $msg[0] = "Recarregando as regras de firewall!";
+       $msg[1] = "Reloading firewall rules!";
        $msg2[0] = "<font size=\'2\'>Recarregando todas as regras...</font>";
        $msg2[1] = "<font size=\'2\'>Full reloading...</font>";
        $txtvalue = msgbox("info", "$msg[$FW_LANG]", "<font size=\'2\'>$msg2[$FW_LANG]</font>");
@@ -444,8 +444,8 @@ HTMLCODE
     $msg[0] = "Apagar";
     $msg[1] = "Delete";
     print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>"; 
 
 print FILE << "HTML";

@@ -19,6 +19,7 @@
 # runmodes for each packet acquisition method. Defaults to "autofp" (auto flow pinned
 # load balancing).
 #runmode: autofp
+#runmode: workers
 
 # Specifies the kind of flow load balancer used by the flow pinned autofp mode.
 #
@@ -85,7 +86,8 @@ outputs:
   # Extensible Event Format (nicknamed EVE) event log in JSON format
   - eve-log:
       enabled: yes
-      type: file #file|syslog|unix_dgram|unix_stream
+      filetype: regular #regular|syslog|unix_dgram|unix_stream|redis
+      #type: file #file|syslog|unix_dgram|unix_stream
       filename: eve.json
       # the following are valid when type: syslog above
       #identity: "suricata"
@@ -95,13 +97,13 @@ outputs:
       types:
         - alert
         #- http:
-        #    extended: yes     # enable this for extended logging information
+        #    extended: yes      # enable this for extended logging information
         #    # custom allows additional http fields to be included in eve-log
         #    # the example below adds three additional fields when uncommented
         #    #custom: [Accept-Encoding, Accept-Language, Authorization]
         #- dns
         #- tls:
-        #    extended: yes     # enable this for extended logging information
+        #    extended: no       # enable this for extended logging information
         #- files:
         #    force-magic: yes   # force logging magic on all logged files
         #    force-md5: yes     # force logging of md5 checksums
@@ -197,6 +199,7 @@ outputs:
       #sguil-base-dir: /nsm_data/
       #ts-format: usec # sec or usec second format (default) is filename.sec usec is filename.sec.usec
       use-stream-depth: no #If set to "yes" packets seen after reaching stream inspection depth are ignored. "no" logs all packets
+      honor-pass-rules: no # If set to "yes", flows in which a pass rule matched will stopped being logged.
 
   # a full alerts log containing much information for signature writers
   # or for investigating suspected false positives.
@@ -220,6 +223,8 @@ outputs:
   - stats:
       enabled: no
       filename: stats.log
+      totals: yes       # stats for all threads merged together
+      threads: no       # per thread stats
       interval: 8
 
   # a line based alerts log similar to fast.log into syslog
@@ -266,6 +271,38 @@ outputs:
       force-magic: no   # force logging magic on all logged files
       force-md5: no     # force logging of md5 checksums
 
+  # Log TCP data after stream normalization
+  # 2 types: file or dir. File logs into a single logfile. Dir creates
+  # 2 files per TCP session and stores the raw TCP data into them.
+  # Using 'both' will enable both file and dir modes.
+  #
+  # Note: limited by stream.depth
+  - tcp-data:
+      enabled: no
+      type: file
+      filename: tcp-data.log
+
+  # Log HTTP body data after normalization, dechunking and unzipping.
+  # 2 types: file or dir. File logs into a single logfile. Dir creates
+  # 2 files per HTTP session and stores the normalized data into them.
+  # Using 'both' will enable both file and dir modes.
+  #
+  # Note: limited by the body limit settings
+  - http-body-data:
+      enabled: no
+      type: file
+      filename: http-data.log
+
+  # Lua Output Support - execute lua script to generate alert and event
+  # output.
+  # Documented at:
+  # https://redmine.openinfosecfoundation.org/projects/suricata/wiki/Lua_Output
+  - lua:
+      enabled: no
+      #scripts-dir: /etc/suricata/lua-output/
+      scripts:
+      #   - script1.lua
+
 # Magic file. The extension .mgc is added to the value here.
 #magic-file: /usr/share/file/magic
 magic-file: /usr/share/file/magic
@@ -310,7 +347,7 @@ nflog:
 # af-packet support
 # Set threads to > 1 to use PACKET_FANOUT support
 af-packet:
-  - interface: eth0
+  - interface: eth0.2025
     # Number of receive threads (>1 will enable experimental flow pinned
     # runmode)
     threads: 1
@@ -363,9 +400,16 @@ af-packet:
     # will not be copied.
     #copy-mode: ips
     #copy-iface: eth1
-  - interface: eth1
+  - interface: eth7.2000
     threads: 1
     cluster-id: 98
+    cluster-type: cluster_flow
+    #defrag: yes
+    # buffer-size: 32768
+    # disable-promisc: no
+  - interface: eth5.3
+    threads: 1
+    cluster-id: 97
     cluster-type: cluster_flow
     #defrag: yes
     # buffer-size: 32768
@@ -403,7 +447,7 @@ legacy:
 # If the argument specified is 0, the engine uses an internally defined
 # default limit.  On not specifying a value, we use no limits on the recursion.
 detect-engine:
-  - profile: medium
+  - profile: high
   - custom-values:
       toclient-src-groups: 2
       toclient-dst-groups: 2
@@ -430,40 +474,40 @@ threading:
   #
   # On Intel Core2 and Nehalem CPU's enabling this will degrade performance.
   #
-  set-cpu-affinity: no
+  set-cpu-affinity: yes
   # Tune cpu affinity of suricata threads. Each family of threads can be bound
   # on specific CPUs.
   cpu-affinity:
     - management-cpu-set:
-        cpu: [ 0 ]  # include only these cpus in affinity settings
+        cpu: [ "0-4" ]  # include only these cpus in affinity settings
     - receive-cpu-set:
-        cpu: [ 0 ]  # include only these cpus in affinity settings
+        cpu: [ "0-4" ]  # include only these cpus in affinity settings
     - decode-cpu-set:
-        cpu: [ 0, 1 ]
+        cpu: [ "5-10" ]
         mode: "balanced"
     - stream-cpu-set:
-        cpu: [ "0-1" ]
+        cpu: [ "5-10" ]
     - detect-cpu-set:
-        cpu: [ "all" ]
+        cpu: [ "11-15" ]
         mode: "exclusive" # run detect threads in these cpus
         # Use explicitely 3 threads and don't compute number by using
         # detect-thread-ratio variable:
-        # threads: 3
+        threads: 5
         prio:
-          low: [ 0 ]
-          medium: [ "1-2" ]
-          high: [ 3 ]
+          low: [ "11-13" ]
+          medium: [ 13,14 ]
+          high: [ 14,15 ]
           default: "medium"
     - verdict-cpu-set:
-        cpu: [ 0 ]
+        cpu: [ "5-10" ]
         prio:
           default: "high"
     - reject-cpu-set:
-        cpu: [ 0 ]
+        cpu: [ 10 ]
         prio:
           default: "low"
     - output-cpu-set:
-        cpu: [ "all" ]
+        cpu: [ "5-10" ]
         prio:
            default: "medium"
   #
@@ -565,7 +609,7 @@ pattern-matcher:
 # Defrag settings:
 
 defrag:
-  memcap: 128mb
+  memcap: 256mb
   hash-size: 65536
   trackers: 65535 # number of defragmented flows to follow
   max-frags: 65535 # number of fragments to keep (higher than trackers)
@@ -607,7 +651,7 @@ defrag:
 # in bytes.
 
 flow:
-  memcap: 128mb
+  memcap: 256mb
   hash-size: 65536
   prealloc: 10000
   emergency-recovery: 30
@@ -716,12 +760,12 @@ flow-timeouts:
 #                               # in the pool.
 #
 stream:
-  memcap: 128mb
+  memcap: 1gb
   checksum-validation: no        # reject wrong csums
   #inline: auto                  # auto will use inline mode in IPS mode, yes or no set it statically
   inline: no
   reassembly:
-    memcap: 128mb
+    memcap: 1gb
     depth: 1mb                  # reassemble 1mb into a stream
     toserver-chunk-size: 2560
     toclient-chunk-size: 2560
@@ -752,10 +796,19 @@ stream:
 # Host table is used by tagging and per host thresholding subsystems.
 #
 host:
-  #hash-size: 12288
-  hash-size: 4096
+  #hash-size: 4096
+  hash-size: 12288
   prealloc: 1000
   memcap: 16777216
+
+# IP Pair table:
+#
+# Used by xbits 'ippair' tracking.
+#
+#ippair:
+#  hash-size: 4096
+#  prealloc: 1000
+#  memcap: 16777216
 
 # Logging configuration.  This is not about logging IDS alerts, but
 # IDS output about what its doing, errors, etc.
@@ -860,7 +913,9 @@ pfring:
     #threads: 2
 
 pcap:
-  - interface: eth0
+  - interface: eth0.2025
+  - interface: eth7.2000
+  - interface: eth5.3
     # On Linux, pcap will try to use mmaped capture and will use buffer-size
     # as total of memory used by the ring. So set this to something bigger
     # than 1% of your bandwidth.
@@ -930,6 +985,7 @@ ipfw:
 # if not set, it will look at the current working dir
 default-rule-path: /etc/suricata/rules
 rule-files:
+ - local.rules
  - ddos.rules
  - botcc.rules
  - ciarmy.rules
@@ -979,6 +1035,8 @@ rule-files:
  - smtp-events.rules    # available in suricata sources under rules dir
  - dns-events.rules     # available in suricata sources under rules dir
  - tls-events.rules     # available in suricata sources under rules dir
+# - modbus-events.rules  # available in suricata sources under rules dir
+# - app-layer-events.rules  # available in suricata sources under rules dir
 
 classification-file: /etc/suricata/classification.config
 reference-config-file: /etc/suricata/reference.config
@@ -990,7 +1048,8 @@ vars:
   # These would be retrieved during the Signature address parsing stage.
   address-groups:
 
-    HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]"
+    #HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]"
+    HOME_NET: "[187.86.226.0/23]"
 
     EXTERNAL_NET: "!$HOME_NET"
 
@@ -1055,7 +1114,7 @@ host-os-policy:
   bsd: []
   bsd-right: []
   old-linux: []
-  linux: [127.0.0.11, "8762:2352:6241:7245:E000:0000:0000:0000"]
+  linux: [187.86.226.25, 187.86.226.72, 187.86.226.123, 187.86.226.190, "8762:2352:6241:7245:E000:0000:0000:0000"]
   old-solaris: []
   solaris: ["::1"]
   hpux10: []
@@ -1200,14 +1259,18 @@ app-layer:
 
            # Can be specified in kb, mb, gb.  Just a number indicates
            # it's in bytes.
-           request-body-limit: 3072
-           response-body-limit: 3072
+           request-body-limit: 40kb
+           response-body-limit: 40kb
 
            # inspection limits
            request-body-minimal-inspect-size: 32kb
            request-body-inspect-window: 4kb
            response-body-minimal-inspect-size: 32kb
            response-body-inspect-window: 4kb
+
+           # auto will use http-body-inline mode in IPS mode, yes or no set it statically
+           http-body-inline: auto
+
            # Take a random value for inspection sizes around the specified value.
            # This lower the risk of some evasion technics but could lead
            # detection change between runs. It is set to 'yes' by default.
@@ -1225,7 +1288,7 @@ app-layer:
          server-config:
 
            - apache:
-               address: [127.0.0.12, 127.0.0.0/8, "::1"]
+               address: [187.86.226.123, 187.86.226.25, 187.86.226.72, 187.86.226.190, 127.0.0.0/8, "::1"]
                personality: Apache_2
                # Can be specified in kb, mb, gb.  Just a number indicates
                # it's in bytes.
@@ -1236,7 +1299,7 @@ app-layer:
 
            - iis7:
                address:
-                 - 127.0.0.13
+                 - 187.86.224.70
                personality: IIS_7_0
                # Can be specified in kb, mb, gb.  Just a number indicates
                # it's in bytes.
@@ -1269,6 +1332,9 @@ profiling:
     # Limit the number of items printed at exit.
     limit: 100
 
+    # output to json
+    #json: true
+
   # per keyword profiling
   keywords:
     enabled: yes
@@ -1297,6 +1363,11 @@ profiling:
   locks:
     enabled: no
     filename: lock_stats.log
+    append: yes
+
+  pcap-log:
+    enabled: no
+    filename: pcaplog_stats.log
     append: yes
 
 # Suricata core dump configuration. Limits the size of the core dump file to

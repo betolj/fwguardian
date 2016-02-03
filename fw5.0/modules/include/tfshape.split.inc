@@ -203,7 +203,10 @@
               if (match($0,"[ |\t]premark-rule($|[ |\t])")) bwnf_flow[name_qos] = "PREROUTING";
               else if (match($0,"[ |\t]postmark-rule($|[ |\t])")) bwnf_flow[name_qos] = "POSTROUTING";
            }
-           else classifier="classify-rule";
+           else {
+              classifier="classify-rule";
+              if (match($0,"[ |\t]post-rule($|[ |\t])")) bwnf_flow[name_qos] = "POSTROUTING";
+           }
 
            if (!bwnf_existflow[bwnf_flow[name_qos]]) {
               bwnf_existflow[bwnf_flow[name_qos]] = bwnf_flow[name_qos];

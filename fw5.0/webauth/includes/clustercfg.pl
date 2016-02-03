@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # "POST /admin/chcluster.cgi" -> save or reload button
 sub chcluster {
@@ -156,8 +156,8 @@ sub chcluster {
        }
     }
     else {
-       $msg[0] = "Aplicando as configurações do cluster!";
-       $msg[1] = "Applying cluster configurations!";
+       $msg[0] = "Recarregando as configurações do cluster!";
+       $msg[1] = "Reloading cluster configurations!";
        $msg2[0] = "<font size=\'2\'>Recarregando todas as regras...</font>";
        $msg2[1] = "<font size=\'2\'>Full reloading...</font>";
        $txtvalue = msgbox("info", "$msg[$FW_LANG]", "<font size=\'2\'>$msg2[$FW_LANG]</font>");
@@ -761,8 +761,8 @@ if ($cltype eq "interface") {
     $msg[0] = "Cancelar";
     $msg[1] = "Cancel";
     print FILE " <a href='#' id='btcan1' class='uibt_em'>$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href='#' id='btrel1' class='uibt'>$msg[$FW_LANG]</a>";
     print FILE "</div>";
 
@@ -819,8 +819,8 @@ HTMLCODE
     $msg[0] = "Apagar";
     $msg[1] = "Delete";
     print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href='#' id='btrel2' class='uibt'>$msg[$FW_LANG]</a>";
 
     print FILE "</div>" if ($cltype eq "interface");

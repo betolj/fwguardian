@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # "POST /admin/chfwnat.cgi" -> save or reload button
 sub chnatrl {
@@ -161,8 +161,8 @@ sub chnatrl {
     else {
        my $rtime = 2;
        if ($canch == 1) {
-          $msg[0] = "Aplicando as regras de NAT!";
-          $msg[1] = "Applying NAT rules!";
+          $msg[0] = "Recarregando as regras de NAT!";
+          $msg[1] = "Reloading NAT rules!";
           $msg2[0] = "<font size=\'2\'>Recarregando rtnat...</font>";
           $msg2[1] = "<font size=\'2\'>rtnal reloading...</font>";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "$msg2[$FW_LANG]");
@@ -986,8 +986,8 @@ HTMLCODE
    $msg[0] = "Apagar";
    $msg[1] = "Delete";
    print FILE " <a href=\"#\" id=\"btdel\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-   $msg[0] = "Aplicar";
-   $msg[1] = "Apply";
+   $msg[0] = "Recarregar";
+   $msg[1] = "Reload";
    print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
 
 print FILE << "HTML";

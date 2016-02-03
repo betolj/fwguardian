@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-#Rev.1 - Version 5.0
+#Rev.2 - Version 5.0
 
 # File Editor
 
@@ -505,8 +505,8 @@ sub chfeman {
           }
           $msg[0] = "O arquivo $chfile foi modificado!";
           $msg[1] = "The $chfile file has been modified!";
-          $msg2[0] = "Você pode utilizar o botão <strong><i>Aplicar</i></strong>!";
-          $msg2[1] = "You can use <strong><i>Apply</i></strong> button!";
+          $msg2[0] = "Você pode utilizar o botão <strong><i>Recarregar</i></strong>!";
+          $msg2[1] = "You can use <strong><i>Reload</i></strong> button!";
           $txtvalue = msgbox("info", "$msg[$FW_LANG]", "$msg2[$FW_LANG]");
        }
        else {
@@ -1101,8 +1101,8 @@ HTMLSource
       $msg[0] = "Cancelar";
       $msg[1] = "Cancel";
       print FILE " &nbsp; <a href=\"#\" id=\"btcan\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-      $msg[0] = "Aplicar";
-      $msg[1] = "Apply";
+      $msg[0] = "Recarregar";
+      $msg[1] = "Reload";
       print FILE " &nbsp; <a href=\"#\" id=\"btrel\" class=\"uibt\">$msg[$FW_LANG]</a>";
     }
     else {
@@ -1129,8 +1129,8 @@ HTMLSource
     $msg[0] = "Apagar";
     $msg[1] = "Delete";
     print FILE " <a href=\"#\" id=\"btdelr\" class=\"uibt_em\">$msg[$FW_LANG]</a>";
-    $msg[0] = "Aplicar";
-    $msg[1] = "Apply";
+    $msg[0] = "Recarregar";
+    $msg[1] = "Reload";
     print FILE " &nbsp; <a href=\"#\" id=\"btrelr\" class=\"uibt\">$msg[$FW_LANG]</a>";
     print FILE "</div>";
 

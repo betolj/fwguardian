@@ -506,18 +506,15 @@ dosprotect() {
     modprobe ipt_SYNPROXY 2>/dev/null
     modprobe nf_synproxy_core 2>/dev/null
     if [ "$SYN_C_FW" == "yes" ] && [ $(lsmod | grep synproxy | wc -l) -gt 0 ]; then
-       maxconn=$(sysctl net.netfilter.nf_conntrack_max | cut -d " " -f 3)
        [ "$maxconn" == "" ] || [ "$maxconn" -lt 65536 ] && maxconn=65536
 
        maxsyn=$((maxconn / 3))
-       hashsize=$maxsyn
        [ "$maxsyn" -lt 30000 ] && maxsyn=30000
        echo $maxsyn > /proc/sys/net/ipv4/tcp_max_syn_backlog
 
        [ $maxsyn -gt 30000 ] && maxsyn=30000
        echo $maxsyn > /proc/sys/net/core/somaxconn
        echo $maxconn > /proc/sys/net/core/netdev_max_backlog
-       echo $hashsize > /sys/module/nf_conntrack/parameters/hashsize
        echo 0 > /proc/sys/net/netfilter/nf_conntrack_tcp_loose
        echo 1 > /proc/sys/net/ipv4/tcp_timestamps
 
@@ -568,7 +565,7 @@ dosprotect() {
           done
           unset indev
        fi
-       unset maxconn maxsyn hashsize
+       unset maxsyn
     fi
   else
     ## Restore the main tcp kernel values
@@ -841,10 +838,25 @@ fi
 #### Dendy portscanners
 [ "$PORTS" == "yes" ] && pscan
 
-#### Tunning tcp parms to DOS protect
-[ "$TCPDOSP" == "yes" ] && dosprotect do || dosprotect no
+#### Default nf_conntrack_max and DDoS protect
+maxconn=65536
+if [ -f /proc/sys/net/netfilter/nf_conntrack_max ]; then
+   maxconn=$(sysctl net.netfilter.nf_conntrack_max | cut -d " " -f 3)
 
-unset UNCL_FW PORTS TCPDOSP SYN_C_FW
+   # Tunning tcp parms to DOS protect
+   [ "$TCPDOSP" == "yes" ] && dosprotect do || dosprotect no
+
+   # Set a proper hashsize
+   if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
+      hashsize=$((maxconn / 8))
+      [ $hashsize -le 16384 ] && hashsize=16384
+      echo $hashsize > /sys/module/nf_conntrack/parameters/hashsize
+
+      unset hashsize
+   fi
+fi
+
+unset UNCL_FW PORTS TCPDOSP SYN_C_FW maxconn
 
 
 #### Allow ICMP frag-needed (MTU-mss), time-exceeded and source-quench
