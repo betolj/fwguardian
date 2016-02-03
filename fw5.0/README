@@ -5,6 +5,9 @@
 # - Suggestions?
 #   betolj@gmail.com
 
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=4KDWWS2B2GBGQ&lc=BR&item_name=betolj%40gmail%2ecom" target="_blank"><img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" alt="PayPal — The safer, easier way to pay online."></a>
+
+
 Many firewall features will be seen with module (disabled by default):
    - use "--show-modules" to view all supported modules
    - use "--enable" or "--disable" to enable|disable a firewall module
