@@ -54,25 +54,37 @@ function fwalias(cmd, fwmodule) {
 
       ### Apply Alias
       if (alcont && (!match($1, "^set-") || $1 == "set-qos")) {
+         if (match($1,"->")) split($1, ifdir, "->");
+         else {
+            ifdir[1]=$1;
+            ifdir[2]="";
+         }
+         for (i=1; i<3; i++) {
+            auxstr1[i]="";
+            auxstr2[i]="";
+            if (match(ifdir[i], "^!|+$")) {
+               if (match(ifdir[i],"^!")) auxstr1[i]="!";
+               if (match(ifdir[i],"+$")) auxstr2[i]="+";
+            }
+         }
+
          for (i in aalias) {
-           if (match($1,"->")) {
-              if(match($1,"^[!]*"aalias[i]"->")) {
-                  if (match($1,"^!")) sub("^!"aalias[i]"->", "!"avalue[i]"->", $1);
-                  else sub("^"aalias[i]"->", avalue[i]"->", $1); }
-              if(match($1,"->[!]*"aalias[i]"$")) {
-                  if (match($1, "->!")) sub("->!"aalias[i], "->!"avalue[i], $1);
-                  else sub("->"aalias[i], "->"avalue[i], $1); }
+           # Interface aliases
+           if (sub("(^!|^)"aalias[i]"($|+$)", avalue[i], ifdir[1])) ifdir[1]=auxstr1[1]""ifdir[1]""auxstr2[1];
+           if (ifdir[2] != "") {
+              if (sub("(^!|^)"aalias[i]"($|+$)", avalue[i], ifdir[2])) ifdir[2]=auxstr1[2]""ifdir[2]""auxstr2[2];
+              if (match($1,"->")) $1=ifdir[1]"->"ifdir[2];
            }
-           stchk=1;
+           else $1=ifdir[1];
+
+           stchk=2;
            maxchk=3;
            if (fwmodule == "rtnat") maxchk=5;
            else if (fwmodule == "fwmasq") maxchk=2;
            else if (fwmodule == "fwhost") {
-              stchk=2;
               maxchk=2;
            }
            else if (fwmodule == "fwconf") {
-              stchk=2;
               maxchk=6;
            }
            for (j=stchk; j<=maxchk; j++) {

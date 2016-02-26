@@ -4,6 +4,11 @@ FwGuardian 5.0
 The Web GUI for Firewall Configuration was introduced only in 4.2 series.
 The main bugfix was made in this series.
 
+26 Fev 2016
+	Apply alias interface bugfix
+	Update ndpi-netfilter code
+	Fix rrd_collect.pl
+
 13 Jul 2015
 	clusterctl.pl fix	
 
