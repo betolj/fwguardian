@@ -15,9 +15,9 @@ sh=$(which bash 2>/dev/null)
 ipset=$(which ipset)
 setkey=$(which setkey 2>/dev/null)
 iptables=$(which iptables 2>/dev/null)
-FW_DIR=$(readlink -f "$(dirname $0)"/)
 sedipt=$(echo $iptables | sed "s/\//\\\\\//g")
 igawk=$(which igawk 2>/dev/null)
+[ -f /etc/default/fwguardian ] && . /etc/default/fwguardian || FW_DIR=$(readlink -f "$(dirname $0)"/)
 
 fwver=5.0.stable
 $FW_DIR/modules/fwlock.sh lock $$
@@ -506,6 +506,7 @@ dosprotect() {
     modprobe ipt_SYNPROXY 2>/dev/null
     modprobe nf_synproxy_core 2>/dev/null
     if [ "$SYN_C_FW" == "yes" ] && [ $(lsmod | grep synproxy | wc -l) -gt 0 ]; then
+       maxconn=$(sysctl net.netfilter.nf_conntrack_max | cut -d " " -f 3)
        [ "$maxconn" == "" ] || [ "$maxconn" -lt 65536 ] && maxconn=65536
 
        maxsyn=$((maxconn / 3))
@@ -848,7 +849,7 @@ if [ -f /proc/sys/net/netfilter/nf_conntrack_max ]; then
 
    # Set a proper hashsize
    if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
-      hashsize=$((maxconn / 8))
+      hashsize=$((maxconn / 4))
       [ $hashsize -le 16384 ] && hashsize=16384
       echo $hashsize > /sys/module/nf_conntrack/parameters/hashsize
 
@@ -993,7 +994,10 @@ if [ "$IP_FWD" == "yes" ] || [ "$SHARENET" == "yes" ]; then
   unset indev
 
   ## Default RtSec action
-  [ "$flagrl" -eq 1 ] && $iptables -t mangle -A RtSec -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+  [ "$flagrl" -eq 1 ] && {
+	$iptables -t mangle -A RtSec -m comment --comment "rtsec return" -j RETURN
+	$iptables -t mangle -A RtSec -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+  }
   $iptables -t mangle -A RtSec -j LOG --log-level info --log-prefix "RtSec DROP: "
   $iptables -t mangle -A RtSec -j DROP
 
@@ -1017,7 +1021,7 @@ else
   flag=0
 fi
 echo $flag > /proc/sys/net/ipv4/ip_forward
-unset flag flagrl
+unset flag
 
 #### Traffic Shape
 if [ -f /usr/share/fwguardian/modules/tfstart.ctl ]; then
@@ -1150,9 +1154,11 @@ if [ "$SHARENET" == "yes" ] || [ "$IP_FWD" == "yes" ] ; then
 
   # Deny other forward packages
   $iptables -A FORWARD -j DROP
+  [ "$flagrl" -eq 1 ] && $iptables -t mangle -D RtSec -m comment --comment "rtsec return" -j RETURN 2>/dev/null
 
   unset PRIV_DEF mifrt mrede conta
 fi
+unset flagrl
    
 
 #### Stateful input

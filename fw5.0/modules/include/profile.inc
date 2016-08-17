@@ -111,7 +111,7 @@
          if (proflim) {
             if ($5=="PKTLIMIT") {
               ### Hashlimit control
-              if (match($8, "^[0-9]+/s,[0-9]+$")) {
+              if (match($8, "^[0-9]+/[smh],[0-9]+$")) {
                  split($8, hlimit, ",");
                  if (match($9,"^flow=") && hlimit[2]) {
                     countp++;

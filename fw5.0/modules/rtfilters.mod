@@ -41,11 +41,14 @@ $iptables -t raw -F RtRules 2>/dev/null
 $iptables -t raw -D PREROUTING -j RtRules 2>/dev/null
 $iptables -t raw -X RtRules 2>/dev/null
 
+retsec=0
 if [ -f /usr/share/fwguardian/rtfilters.rtsec ]; then
+   $iptables -t mangle -I RtSec -m comment --comment "secrules return" -j RETURN
    $iptables -t mangle -D RtSec -j RtSecRules 2>/dev/null
    $iptables -t mangle -F RtSecRules 2>/dev/null
    $iptables -t mangle -X RtSecRules 2>/dev/null
    rm -f /usr/share/fwguardian/rtfilters.rtsec
+   retsec=1
 fi
 
 [ -f /usr/share/fwguardian/enable_tcprst.ctl ] && tcprst=1 || tcprst=0
@@ -112,6 +115,8 @@ cat $rulefiles 2>/dev/null | \
     @include /usr/share/fwguardian/include/rtfilters.define.inc \
     @include /usr/share/fwguardian/include/rtfilters.inc \
   }' | sed "s/iptables/$sedipt/g" | tee -a $FW_DIR/../build/fwroute.rules | $sh - 2>>$FW_DIR/../logs/fwroute.err
+
+[ "$retsec" -eq 1 ] && $iptables -t mangle -D RtSec -m comment --comment "secrules return" -j RETURN 2>/dev/null
 
 
 ### route auth support
